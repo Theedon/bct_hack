@@ -9,4 +9,4 @@ class Settings(BaseSettings):
     GOOGLE_API_KEY: SecretStr
 
 
-settings = Settings()
+settings = Settings()  # type: ignore[call-arg]
