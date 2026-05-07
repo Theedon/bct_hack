@@ -6,6 +6,8 @@ from src.core.settings import settings
 
 def get_llm(model_name: str):
     if model_name == "claude":
+        if not settings.ANTHROPIC_API_KEY:
+            raise ValueError("ANTHROPIC_API_KEY is not set in .env.local")
         return ChatAnthropic(
             model_name="claude-haiku-4-5",
             api_key=settings.ANTHROPIC_API_KEY,
