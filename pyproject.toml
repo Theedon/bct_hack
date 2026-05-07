@@ -9,4 +9,5 @@ dependencies = [
     "langchain-anthropic>=1.4.3",
     "langchain-google-genai>=4.2.2",
     "langgraph>=1.1.10",
+    "pydantic-settings>=2.14.0",
 ]
