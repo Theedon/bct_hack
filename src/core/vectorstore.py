@@ -16,7 +16,7 @@ def get_vectorstore() -> Chroma:
         )
     embeddings = GoogleGenerativeAIEmbeddings(
         model=settings.EMBEDDING_MODEL,
-        google_api_key=settings.GOOGLE_API_KEY,
+        google_api_key=settings.GOOGLE_API_KEY.get_secret_value(),
     )
     return Chroma(
         collection_name=COLLECTION_NAME,

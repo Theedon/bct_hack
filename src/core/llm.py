@@ -17,7 +17,7 @@ def get_llm(model_name: str):
     if model_name == "gemini":
         return ChatGoogleGenerativeAI(
             model=settings.GEMINI_MODEL,
-            google_api_key=settings.GOOGLE_API_KEY,
+            google_api_key=settings.GOOGLE_API_KEY.get_secret_value(),
         )
     raise ValueError(
         f"Unsupported model_name: {model_name!r}. Use 'claude' or 'gemini'."

@@ -7,6 +7,7 @@ import pandas as pd
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from tqdm import tqdm
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -14,6 +15,7 @@ from src.core.settings import settings
 from src.core.vectorstore import COLLECTION_NAME
 
 CSV_PATH = "data/yelp_agent_data.csv"
+BATCH_SIZE = 100
 
 
 def build_documents(df: pd.DataFrame) -> list[Document]:
@@ -40,23 +42,34 @@ def build_documents(df: pd.DataFrame) -> list[Document]:
 def main() -> None:
     print(f"Loading {CSV_PATH}...")
     df = pd.read_csv(CSV_PATH)
-    print(f"  {len(df)} rows loaded.")
+    total = len(df)
+    print(f"  {total} rows loaded.")
 
     docs = build_documents(df)
 
     embeddings = GoogleGenerativeAIEmbeddings(
         model=settings.EMBEDDING_MODEL,
-        google_api_key=settings.GOOGLE_API_KEY,
+        google_api_key=settings.GOOGLE_API_KEY.get_secret_value(),
     )
 
-    print(f"Embedding and persisting to '{settings.CHROMA_PATH}'...")
-    Chroma.from_documents(
-        documents=docs,
-        embedding=embeddings,
-        collection_name=COLLECTION_NAME,
-        persist_directory=settings.CHROMA_PATH,
-    )
-    print(f"Done. {len(docs)} documents indexed.")
+    batches = [docs[i : i + BATCH_SIZE] for i in range(0, total, BATCH_SIZE)]
+    print(f"Embedding {total} documents in {len(batches)} batches of {BATCH_SIZE}...")
+
+    vectorstore = None
+    with tqdm(total=total, unit="doc", desc="Indexing") as bar:
+        for i, batch in enumerate(batches):
+            if i == 0:
+                vectorstore = Chroma.from_documents(
+                    documents=batch,
+                    embedding=embeddings,
+                    collection_name=COLLECTION_NAME,
+                    persist_directory=settings.CHROMA_PATH,
+                )
+            else:
+                vectorstore.add_documents(batch)
+            bar.update(len(batch))
+
+    print(f"\nDone. {total} documents persisted to '{settings.CHROMA_PATH}'.")
 
 
 if __name__ == "__main__":

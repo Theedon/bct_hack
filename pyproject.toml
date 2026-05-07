@@ -11,5 +11,6 @@ dependencies = [
     "langchain-chroma>=1.1.0",
     "langchain-google-genai>=4.2.2",
     "langgraph>=1.1.10",
+    "pandas>=3.0.2",
     "pydantic-settings>=2.14.0",
 ]

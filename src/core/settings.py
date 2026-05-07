@@ -10,7 +10,7 @@ class Settings(BaseSettings):
 
     CLAUDE_MODEL: str = "claude-haiku-4-5"
     GEMINI_MODEL: str = "gemini-2.5-flash-lite"
-    EMBEDDING_MODEL: str = "models/text-embedding-004"
+    EMBEDDING_MODEL: str = "models/gemini-embedding-2"
     CHROMA_PATH: str = "data/chroma_db"
 
 
