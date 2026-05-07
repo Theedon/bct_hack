@@ -11,3 +11,7 @@ wheels/
 .env
 .env.local
 .env.staging
+
+# Personal scratch space (local only)
+scratch/*
+!scratch/.gitkeep
