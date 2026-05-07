@@ -15,3 +15,6 @@ wheels/
 # Personal scratch space (local only)
 scratch/*
 !scratch/.gitkeep
+
+# Chroma vector index (rebuilt via scripts/ingest.py)
+data/chroma_db/
