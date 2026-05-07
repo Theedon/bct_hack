@@ -1,12 +1,22 @@
 from langchain_anthropic import ChatAnthropic
 from langchain_google_genai import ChatGoogleGenerativeAI
 
+from src.core.settings import settings
+
 
 def get_llm(model_name: str):
     if model_name == "claude":
-        return ChatAnthropic(model_name="claude-haiku-4-5", timeout=None, stop=None)
+        return ChatAnthropic(
+            model_name="claude-haiku-4-5",
+            api_key=settings.ANTHROPIC_API_KEY,
+            timeout=None,
+            stop=None,
+        )
     if model_name == "gemini":
-        return ChatGoogleGenerativeAI(model="gemini-2.5-flash")
+        return ChatGoogleGenerativeAI(
+            model="gemini-2.5-flash",
+            google_api_key=settings.GOOGLE_API_KEY,
+        )
     raise ValueError(
         f"Unsupported model_name: {model_name!r}. Use 'claude' or 'gemini'."
     )
