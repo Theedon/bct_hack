@@ -9,14 +9,14 @@ def get_llm(model_name: str):
         if not settings.ANTHROPIC_API_KEY:
             raise ValueError("ANTHROPIC_API_KEY is not set in .env.local")
         return ChatAnthropic(
-            model_name="claude-haiku-4-5",
+            model_name=settings.CLAUDE_MODEL,
             api_key=settings.ANTHROPIC_API_KEY,
             timeout=None,
             stop=None,
         )
     if model_name == "gemini":
         return ChatGoogleGenerativeAI(
-            model="gemini-2.5-flash",
+            model=settings.GEMINI_MODEL,
             google_api_key=settings.GOOGLE_API_KEY,
         )
     raise ValueError(
