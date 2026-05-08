@@ -16,3 +16,13 @@ class AgentState(TypedDict):
 
     # Analyst node output
     user_manifesto: str
+
+    # Target business (populated at graph entry)
+    business_id: str
+    biz_name: str
+    categories: str
+    biz_attributes_clean: str
+
+    # Retriever node outputs
+    retrieved_reviews: list[dict]
+    new_experience: bool
