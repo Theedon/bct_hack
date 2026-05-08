@@ -1,4 +1,4 @@
-"""One-time script to embed yelp_agent_data.csv into a persistent Chroma index."""
+"""One-time script to embed data/yelp_review/train.csv into a persistent Chroma index."""
 
 import sys
 from pathlib import Path
@@ -14,7 +14,7 @@ from src.core.embeddings import GeminiEmbeddings
 from src.core.settings import settings
 from src.core.vectorstore import COLLECTION_NAME
 
-CSV_PATH = "data/yelp_agent_data.csv"
+CSV_PATH = "data/yelp_review/train.csv"
 BATCH_SIZE = 100
 
 
