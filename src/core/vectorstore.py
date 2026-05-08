@@ -1,8 +1,8 @@
 import os
 
 from langchain_chroma import Chroma
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
+from src.core.embeddings import GeminiEmbeddings
 from src.core.settings import settings
 
 COLLECTION_NAME = "yelp_reviews"
@@ -14,12 +14,8 @@ def get_vectorstore() -> Chroma:
             f"Chroma index not found at '{settings.CHROMA_PATH}'. "
             "Run `uv run python scripts/ingest.py` first."
         )
-    embeddings = GoogleGenerativeAIEmbeddings(
-        model=settings.EMBEDDING_MODEL,
-        google_api_key=settings.GOOGLE_API_KEY.get_secret_value(),
-    )
     return Chroma(
         collection_name=COLLECTION_NAME,
         persist_directory=settings.CHROMA_PATH,
-        embedding_function=embeddings,
+        embedding_function=GeminiEmbeddings(),
     )

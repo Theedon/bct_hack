@@ -6,11 +6,11 @@ from pathlib import Path
 import pandas as pd
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from tqdm import tqdm
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from src.core.embeddings import GeminiEmbeddings
 from src.core.settings import settings
 from src.core.vectorstore import COLLECTION_NAME
 
@@ -47,10 +47,7 @@ def main() -> None:
 
     docs = build_documents(df)
 
-    embeddings = GoogleGenerativeAIEmbeddings(
-        model=settings.EMBEDDING_MODEL,
-        google_api_key=settings.GOOGLE_API_KEY.get_secret_value(),
-    )
+    embeddings = GeminiEmbeddings()
 
     batches = [docs[i : i + BATCH_SIZE] for i in range(0, total, BATCH_SIZE)]
     print(f"Embedding {total} documents in {len(batches)} batches of {BATCH_SIZE}...")
