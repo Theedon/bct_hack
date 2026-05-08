@@ -1,8 +1,12 @@
+import math
+import random
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from src.agent.state import AgentState
 from src.core.llm import get_llm
 from src.core.vectorstore import get_vectorstore
+
+_MAX_REVIEWS = 15
 
 _llm = get_llm("gemini")
 
@@ -33,6 +37,22 @@ def _build_metrics(state: AgentState) -> str:
     )
 
 
+def _sample_reviews(reviews: list[dict], n: int) -> list[dict]:
+    """Proportional stratified sample preserving low/high star ratio, min 1 each bucket."""
+    low = [r for r in reviews if r["stars"] <= 3]
+    high = [r for r in reviews if r["stars"] > 3]
+
+    if not low or not high:
+        return random.sample(reviews, min(n, len(reviews)))
+
+    low_slots = max(1, math.floor(n * len(low) / len(reviews)))
+    high_slots = max(1, n - low_slots)
+
+    sampled_low = random.sample(low, min(low_slots, len(low)))
+    sampled_high = random.sample(high, min(high_slots, len(high)))
+    return sampled_low + sampled_high
+
+
 def _fetch_user_reviews(user_id: str) -> list[dict]:
     try:
         vs = get_vectorstore()
@@ -40,10 +60,11 @@ def _fetch_user_reviews(user_id: str) -> list[dict]:
             where={"user_id": user_id},
             include=["documents", "metadatas"],
         )
-        return [
+        reviews = [
             {"text": doc, "stars": meta["stars_review"], "biz_name": meta["biz_name"]}
             for doc, meta in zip(results["documents"], results["metadatas"])
         ]
+        return _sample_reviews(reviews, _MAX_REVIEWS) if len(reviews) > _MAX_REVIEWS else reviews
     except Exception:
         return []
 
