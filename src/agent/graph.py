@@ -1,6 +1,15 @@
-from langchain.agents import create_agent
+from langgraph.graph import END, StateGraph
 
-from src.core.llm import get_llm
+from src.agent.nodes.analyst import analyst
+from src.agent.state import AgentState
 
-llm = get_llm("gemini")
-agent = create_agent(model=llm, tools=[])
+
+def build_graph():
+    g = StateGraph(AgentState)
+    g.add_node("analyst", analyst)
+    g.set_entry_point("analyst")
+    g.add_edge("analyst", END)
+    return g.compile()
+
+
+graph = build_graph()
