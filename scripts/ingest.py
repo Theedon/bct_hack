@@ -21,9 +21,18 @@ BATCH_SIZE = 100
 def build_documents(df: pd.DataFrame) -> list[Document]:
     docs = []
     for _, row in df.iterrows():
+        categories = str(row.get("categories", ""))
+        biz_attributes_clean = str(row.get("biz_attributes_clean", ""))
+        stars_review = float(row.get("stars_review", 0))
+        text = str(row["text"])
         docs.append(
             Document(
-                page_content=str(row["text"]),
+                page_content=(
+                    f"Category: {categories} | "
+                    f"Attributes: {biz_attributes_clean[:150]} | "
+                    f"Sentiment: {stars_review} stars | "
+                    f"Review: {text[:200]}"
+                ),
                 metadata={
                     "user_id": str(row.get("user_id", "")),
                     "user_name": str(row.get("user_name", "")),
@@ -34,10 +43,11 @@ def build_documents(df: pd.DataFrame) -> list[Document]:
                     "business_id": str(row.get("business_id", "")),
                     "biz_name": str(row.get("biz_name", "")),
                     "biz_stars": float(row.get("biz_stars", 0)),
-                    "categories": str(row.get("categories", "")),
-                    "biz_attributes_clean": str(row.get("biz_attributes_clean", "")),
-                    "stars_review": float(row.get("stars_review", 0)),
+                    "categories": categories,
+                    "biz_attributes_clean": biz_attributes_clean,
+                    "stars_review": stars_review,
                     "date": str(row.get("date", "")),
+                    "review_text": text,
                 },
             )
         )
