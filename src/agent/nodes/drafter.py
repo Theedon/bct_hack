@@ -87,11 +87,14 @@ def _build_system_prompt(avg_words: int, anchors: list[str], predicted_rating: f
         "Rules:\n"
         f"1. Match length: Write approximately {avg_words} words — match the user's typical review length.\n"
         f"{anchor_rule}\n"
-        "3. Match tone: Mirror the vocabulary, sentence rhythm, and punctuation style in the Writing Samples.\n"
+        "3. Match tone: Mirror the vocabulary, sentence rhythm, and punctuation style in the Writing Samples. "
+        "Use the samples for style ONLY — do not reference, copy, or echo any specific business names, "
+        "menu items, dishes, or factual details from the Writing Samples into the new review.\n"
         f"4. Justify the rating: Use the Reasoning Trace to explain the 'why' behind {predicted_rating} stars "
         "— but express it in the user's voice, not an analyst's voice.\n"
         "5. Be specific: Mention concrete attributes of the target business (e.g. WiFi, parking, price range). "
-        "No generic filler like 'This place was great.'\n"
+        "No generic filler like 'This place was great.' If you cannot be specific, be vague in the user's "
+        "natural voice — never use placeholder text like '[mention dish here]' or bracketed instructions.\n"
         "6. Do not break character. Write as the user, not about the user."
     )
 
