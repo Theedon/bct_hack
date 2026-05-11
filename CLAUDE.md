@@ -13,6 +13,7 @@
 
 - Always run Python commands via `uv run` — never `python3`, `python`, or direct script invocation
 - Examples: `uv run pytest`, `uv run python -c "..."`, `uv run mypy src/`
+- Run `src/main.py` as a module: `uv run python -m src.main --n 5 --output results/output.csv`
 
 ## Tests
 

@@ -18,3 +18,6 @@ scratch/*
 
 # Chroma vector index (rebuilt via scripts/ingest.py)
 data/chroma_db/
+
+# Evaluation run outputs
+results/
