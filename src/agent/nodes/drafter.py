@@ -13,36 +13,52 @@ class DrafterOutput(BaseModel):
 
 _llm = get_llm("gemini").with_structured_output(DrafterOutput)
 
-_STRONG_MARKERS = re.compile(
-    r"\b(love|hate|never|always|absolutely|amazing|terrible|awful|perfect|horrible|obsessed)\b",
-    re.IGNORECASE,
+# Patterns that carry stylistic voice without content-specific nouns:
+# - interjections / openers: "So far,", "I gotta say,"
+# - adverb+adjective: "absolutely worth it", "surprisingly good"
+# - first-person + strong verb/adj (2-4 words): "I loved it", "I'll never"
+# - exclamation tails: "must try!", "go in!"
+_STYLISTIC_FRAGMENT = re.compile(
+    r"""
+    (?:
+        \b(?:wow|honestly|seriously|surprisingly|absolutely|definitely|
+           clearly|genuinely|truly|unfortunately|thankfully)\b\s+\w+  # adverb+word
+      | \bI(?:'ll|'ve|'d|'m)?\s+(?:love|hate|never|always|highly|totally|
+            definitely|honestly|really|still)\b[^.!?,]{0,20}          # I + strong verb start
+      | \b(?:must|can't|cannot|won't|don't)\s+\w+(?:\s+\w+)?!?        # modal + verb (short)
+      | \b\w+(?:\s+\w+){1,3}[!]                                        # 2-4 words ending in !
+    )
+    """,
+    re.IGNORECASE | re.VERBOSE,
 )
 
 
 def _extract_anchors(reviews: list[dict], max_anchors: int = 5) -> list[str]:
     candidates: list[tuple[int, str]] = []
     for review in reviews:
-        sentences = re.split(r"(?<=[.!?])\s+", review["text"].strip())
-        for sentence in sentences:
-            words = sentence.split()
-            if not (4 <= len(words) <= 12):
+        for match in _STYLISTIC_FRAGMENT.finditer(review["text"]):
+            fragment = match.group().strip().rstrip(",")
+            words = fragment.split()
+            if not (2 <= len(words) <= 5):
                 continue
             score = 0
-            if sentence.endswith("!"):
+            if fragment.endswith("!"):
                 score += 2
-            if sentence.lower().startswith("i "):
+            if fragment.lower().startswith("i "):
                 score += 1
-            score += len(_STRONG_MARKERS.findall(sentence))
-            if score > 0:
-                candidates.append((score, sentence.strip()))
+            if any(w.lower() in ("never", "always", "must", "love", "hate", "absolutely")
+                   for w in words):
+                score += 1
+            candidates.append((score, fragment))
+
     candidates.sort(key=lambda x: x[0], reverse=True)
     seen: set[str] = set()
     anchors: list[str] = []
-    for _, phrase in candidates:
-        normalised = phrase.lower()
+    for _, fragment in candidates:
+        normalised = fragment.lower()
         if normalised not in seen:
             seen.add(normalised)
-            anchors.append(phrase)
+            anchors.append(fragment)
         if len(anchors) == max_anchors:
             break
     return anchors
