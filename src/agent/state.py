@@ -30,3 +30,6 @@ class AgentState(TypedDict):
     # Reasoner node outputs
     reasoning_log: str
     predicted_rating: float
+
+    # Drafter node output
+    draft_review: str
