@@ -71,7 +71,7 @@ def _avg_word_count(reviews: list[dict]) -> int:
     return round(sum(counts) / len(counts))
 
 
-def _build_system_prompt(avg_words: int, anchors: list[str], predicted_rating: float) -> str:
+def _build_system_prompt(avg_words: int, anchors: list[str], predicted_rating: float, categories: str) -> str:
     anchor_rule = (
         "2. Anchor phrases: Naturally weave in 1–3 of these phrases extracted from "
         "their past writing (do not force all of them):\n"
@@ -95,7 +95,10 @@ def _build_system_prompt(avg_words: int, anchors: list[str], predicted_rating: f
         "5. Be specific: Mention concrete attributes of the target business (e.g. WiFi, parking, price range). "
         "No generic filler like 'This place was great.' If you cannot be specific, be vague in the user's "
         "natural voice — never use placeholder text like '[mention dish here]' or bracketed instructions.\n"
-        "6. Do not break character. Write as the user, not about the user."
+        "6. Do not break character. Write as the user, not about the user.\n"
+        f"7. Stay on category: The target business belongs to '{categories}'. Every sentence must "
+        "be consistent with that category. Do not introduce references to unrelated cuisines, "
+        "venue types, or activities inferred from the user's past reviews."
     )
 
 
@@ -114,7 +117,7 @@ def drafter(state: AgentState) -> dict:
     anchors = _extract_anchors(reviews) if reviews else []
     avg_words = _avg_word_count(reviews)
 
-    system_prompt = _build_system_prompt(avg_words, anchors, state["predicted_rating"])
+    system_prompt = _build_system_prompt(avg_words, anchors, state["predicted_rating"], state["categories"])
     samples = _format_samples(state)
 
     content = (
