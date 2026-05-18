@@ -11,11 +11,20 @@
 
 ## Commands
 
-- Always run Python commands via `uv run` — never `python3`, `python`, or direct script invocation
-- Examples: `uv run pytest`, `uv run python -c "..."`, `uv run mypy src/`
-- Run the CLI evaluator: `uv run python -m src.main --n 5 --output results/output.csv`
-- Run ingest scripts: `uv run python -m scripts.ingest_reviews` / `uv run python -m scripts.ingest_businesses`
-- Start the API: `uv run uvicorn src.api:app --host 0.0.0.0 --port 8000`
+Always use `uv run` — never `python3`, `python`, or direct invocation.
+
+| Purpose | Command |
+|---|---|
+| Start API | `uv run uvicorn src.api:app --host 0.0.0.0 --port 8000` |
+| Task A evaluator | `uv run python -m src.main --n 5 --output results/output.csv` |
+| Task B evaluator | `uv run python -m src.main_recommend --n 20 --k 5 --output results/output_recommend.csv` |
+| Build review index | `uv run python -m scripts.ingest_reviews` |
+| Build business index | `uv run python -m scripts.ingest_businesses` |
+| Run tests | `uv run pytest` |
+
+**Task A evaluator flags:** `--n` rows (default 5), `--output` path, `--delay` secs between calls (default 1.0)
+
+**Task B evaluator flags:** `--n` users (default all 315), `--k` recs per user (default 5), `--output` path, `--delay` secs between users (default 1.0)
 
 ## Tests
 
