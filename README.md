@@ -47,8 +47,8 @@ cp .env.example .env.local
 # Edit .env.local and set GOOGLE_API_KEY
 
 # 3. Build Chroma indexes (one-time, ~2 min each)
-uv run python -m scripts.ingest_reviews        # yelp_reviews  — 1,421 review docs
-uv run python -m scripts.ingest_businesses     # yelp_businesses — 1,039 business docs
+uv run python -m scripts.ingest_reviews
+uv run python -m scripts.ingest_businesses
 ```
 
 Data files expected at `data/yelp_review/train.csv` and `data/yelp_review/test.csv`.
@@ -165,10 +165,6 @@ src/
             ├── profiler.py       Builds preference manifesto; handles cold-start
             ├── candidate.py      Vector search over businesses, filters visited
             └── ranker.py         LLM ranking with structured output
-
-scripts/
-├── ingest_reviews.py             Build yelp_reviews Chroma collection
-└── ingest_businesses.py          Build yelp_businesses Chroma collection
 ```
 
 ## Environment Variables
