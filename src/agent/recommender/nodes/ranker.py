@@ -6,7 +6,9 @@ from src.core.llm import get_llm
 
 
 class RankedItem(BaseModel):
-    business_id: str = Field(description="The business_id from the candidate list")
+    candidate_number: int = Field(
+        description="The [N] number of the candidate exactly as shown in the list (1-based)"
+    )
     score: float = Field(description="Fit score from 0.0 to 1.0", ge=0.0, le=1.0)
     rationale: str = Field(
         description="1-2 sentences in second person explaining why this fits the user"
@@ -35,14 +37,14 @@ Your Task:
    the manifesto and the query. Reference concrete attributes — do not be \
    vague.
 2. Return the top-k candidates in the `ranked` field, ordered best-first. \
-   Each entry must use the exact `business_id` from the candidate list, \
-   include a `score` in [0.0, 1.0] reflecting fit confidence, and a \
-   `rationale` of 1–2 sentences in second person ("This place fits because \
-   you...") that ties concrete business attributes to the user's preferences \
-   or query.
+   Each entry must include:
+   - `candidate_number`: the exact [N] number shown in the candidate list
+   - `score`: a fit confidence in [0.0, 1.0]
+   - `rationale`: 1–2 sentences in second person ("This place fits because \
+     you...") tied to concrete attributes
 
 Rules:
-- Only use business_ids that appear in the candidate list.
+- Use only candidate_numbers that appear in the list provided.
 - If the explicit query is present, it should heavily shape the ranking.
 - Diversity is a tiebreaker — avoid filling the top with near-duplicate \
   categories unless the user's preferences clearly justify it.
@@ -53,8 +55,7 @@ def _format_candidates(candidates: list[dict]) -> str:
     lines = []
     for i, c in enumerate(candidates, start=1):
         lines.append(
-            f"[{i}] business_id={c['business_id']}\n"
-            f"    Name: {c['biz_name']}\n"
+            f"[{i}] Name: {c['biz_name']}\n"
             f"    Categories: {c['categories']}\n"
             f"    Attributes: {c['biz_attributes_clean']}\n"
             f"    Yelp stars: {c['biz_stars']} | "
@@ -82,12 +83,12 @@ def ranker(state: RecommenderState) -> dict:
         [SystemMessage(content=_SYSTEM_PROMPT), HumanMessage(content=content)]
     )
 
-    by_id = {c["business_id"]: c for c in candidates}
     recommendations: list[dict] = []
     for item in output.ranked[:k]:
-        biz = by_id.get(item.business_id)
-        if biz is None:
+        idx = item.candidate_number - 1
+        if not (0 <= idx < len(candidates)):
             continue
+        biz = candidates[idx]
         recommendations.append(
             {
                 "business_id": biz["business_id"],
