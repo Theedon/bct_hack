@@ -2,7 +2,7 @@ import math
 import random
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from src.agent.state import AgentState
+from src.agent.reviewer.state import AgentState
 from src.core.llm import get_llm
 from src.core.vectorstore import get_vectorstore
 

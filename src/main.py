@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.agent.graph import graph
+from src.agent.reviewer.graph import graph
 
 TEST_CSV = "data/yelp_review/test.csv"
 
@@ -39,7 +39,7 @@ def _run_agent(row: dict) -> dict:
         "biz_name": str(row["biz_name"]),
         "categories": str(row["categories"]),
         "biz_attributes_clean": str(row["biz_attributes_clean"]),
-    })
+    }) # type: ignore
 
 
 def main() -> None:

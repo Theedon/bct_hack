@@ -1,10 +1,10 @@
 from langgraph.graph import END, StateGraph
 
-from src.agent.nodes.analyst import analyst
-from src.agent.nodes.drafter import drafter
-from src.agent.nodes.reasoner import reasoner
-from src.agent.nodes.retriever import retriever
-from src.agent.state import AgentState
+from src.agent.reviewer.nodes.analyst import analyst
+from src.agent.reviewer.nodes.drafter import drafter
+from src.agent.reviewer.nodes.reasoner import reasoner
+from src.agent.reviewer.nodes.retriever import retriever
+from src.agent.reviewer.state import AgentState
 
 
 def build_graph():

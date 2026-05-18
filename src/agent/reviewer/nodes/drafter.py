@@ -3,7 +3,7 @@ import re
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 
-from src.agent.state import AgentState
+from src.agent.reviewer.state import AgentState
 from src.core.llm import get_llm
 
 

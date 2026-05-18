@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from src.agent.graph import graph
+from src.agent.reviewer.graph import graph
 from src.agent.recommender.graph import recommend_graph
 
 app = FastAPI(title="BCT Hack — Stateful Persona Agents")
