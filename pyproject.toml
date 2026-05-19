@@ -17,3 +17,13 @@ dependencies = [
     "pydantic-settings>=2.14.0",
     "uvicorn[standard]>=0.46.0",
 ]
+
+[dependency-groups]
+dev = [
+    "black>=26.5.1",
+    "pre-commit>=4.6.0",
+]
+
+[tool.black]
+line-length = 88
+target-version = ["py314"]

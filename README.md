@@ -46,7 +46,10 @@ uv sync
 cp .env.example .env.local
 # Edit .env.local and set GOOGLE_API_KEY
 
-# 3. Build Chroma indexes (one-time, ~2 min each)
+# 3. Activate the pre-commit formatting hook (one-time per clone)
+uv run pre-commit install
+
+# 4. Build Chroma indexes (one-time, ~2 min each)
 uv run python -m scripts.ingest_reviews
 uv run python -m scripts.ingest_businesses
 ```

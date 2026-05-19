@@ -51,7 +51,7 @@ def _run_agent(row: pd.Series, k: int) -> dict:
             for key, value in state_update.items():
                 if key not in inputs and value:
                     if isinstance(value, str):
-                        preview = value.strip().replace('\n', ' ')
+                        preview = value.strip().replace("\n", " ")
                         if len(preview) > 100:
                             preview = preview[:100] + "..."
                         print(f"      {key}: {preview}")
