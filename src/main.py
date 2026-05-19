@@ -40,21 +40,41 @@ OUTPUT_COLUMNS = [
 
 
 def _run_agent(row: dict) -> dict:
-    return graph.invoke(
-        {
-            "messages": [],
-            "user_id": str(row["user_id"]),
-            "user_name": str(row["user_name"]),
-            "user_review_count": int(row["user_review_count"]),
-            "average_stars": float(row["average_stars"]),
-            "user_elite_count": int(row["user_elite_count"]),
-            "user_fans": int(row["user_fans"]),
-            "business_id": str(row["business_id"]),
-            "biz_name": str(row["biz_name"]),
-            "categories": str(row["categories"]),
-            "biz_attributes_clean": str(row["biz_attributes_clean"]),
-        }
-    )  # type: ignore
+    inputs = {
+        "messages": [],
+        "user_id": str(row["user_id"]),
+        "user_name": str(row["user_name"]),
+        "user_review_count": int(row["user_review_count"]),
+        "average_stars": float(row["average_stars"]),
+        "user_elite_count": int(row["user_elite_count"]),
+        "user_fans": int(row["user_fans"]),
+        "business_id": str(row["business_id"]),
+        "biz_name": str(row["biz_name"]),
+        "categories": str(row["categories"]),
+        "biz_attributes_clean": str(row["biz_attributes_clean"]),
+    }
+
+    final_state = inputs.copy()
+
+    print()  # Add a newline so logs start below the header
+
+    for output in graph.stream(inputs):  # type: ignore
+        for node_name, state_update in output.items():
+            print(f"  → [{node_name}]", flush=True)
+            for key, value in state_update.items():
+                if key not in inputs and value:
+                    if isinstance(value, str):
+                        preview = value.strip().replace("\n", " ")
+                        if len(preview) > 100:
+                            preview = preview[:100] + "..."
+                        print(f"      {key}: {preview}")
+                    elif isinstance(value, list):
+                        print(f"      {key}: {len(value)} items")
+                    else:
+                        print(f"      {key}: {value}")
+            final_state.update(state_update)
+
+    return final_state
 
 
 def main() -> None:
@@ -92,7 +112,6 @@ def main() -> None:
         for i, (_, row) in enumerate(sample.iterrows(), start=1):
             print(
                 f"[{i}/{total}] {row['user_name']} → {row['biz_name']} ...",
-                end=" ",
                 flush=True,
             )
             try:

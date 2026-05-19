@@ -31,18 +31,37 @@ OUTPUT_COLUMNS = [
 
 
 def _run_agent(row: pd.Series, k: int) -> dict:
-    return recommend_graph.invoke(
-        {  # type: ignore[arg-type]
-            "user_id": str(row["user_id"]),
-            "user_name": str(row["user_name"]),
-            "user_review_count": int(row["user_review_count"]),
-            "average_stars": float(row["average_stars"]),
-            "user_elite_count": int(row["user_elite_count"]),
-            "user_fans": int(row["user_fans"]),
-            "query": "",
-            "k": k,
-        }
-    )
+    inputs = {
+        "user_id": str(row["user_id"]),
+        "user_name": str(row["user_name"]),
+        "user_review_count": int(row["user_review_count"]),
+        "average_stars": float(row["average_stars"]),
+        "user_elite_count": int(row["user_elite_count"]),
+        "user_fans": int(row["user_fans"]),
+        "query": "",
+        "k": k,
+    }
+
+    final_state = inputs.copy()
+    print()
+
+    for output in recommend_graph.stream(inputs):  # type: ignore[arg-type]
+        for node_name, state_update in output.items():
+            print(f"  → [{node_name}]", flush=True)
+            for key, value in state_update.items():
+                if key not in inputs and value:
+                    if isinstance(value, str):
+                        preview = value.strip().replace("\n", " ")
+                        if len(preview) > 100:
+                            preview = preview[:100] + "..."
+                        print(f"      {key}: {preview}")
+                    elif isinstance(value, list):
+                        print(f"      {key}: {len(value)} items")
+                    else:
+                        print(f"      {key}: {value}")
+            final_state.update(state_update)
+
+    return final_state
 
 
 def main() -> None:
@@ -98,7 +117,6 @@ def main() -> None:
             print(
                 f"[{i}/{total}] {first['user_name']} "
                 f"({len(all_test_biz)} test biz, {len(liked_test_biz)} liked) ...",
-                end=" ",
                 flush=True,
             )
 
