@@ -12,6 +12,7 @@ dependencies = [
     "langchain-chroma>=1.1.0",
     "langchain-google-genai>=4.2.2",
     "langgraph>=1.1.10",
+    "langsmith>=0.8.2",
     "pandas>=3.0.2",
     "pydantic-settings>=2.14.0",
     "uvicorn[standard]>=0.46.0",
