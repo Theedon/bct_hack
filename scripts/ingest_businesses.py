@@ -25,7 +25,9 @@ ATTRIBUTE_CHARS = 200
 
 def _top_snippets(texts: list[str], n: int = MAX_SNIPPETS) -> list[str]:
     """Pick the n shortest non-empty review texts and truncate each."""
-    cleaned = [t.strip().replace("\n", " ") for t in texts if isinstance(t, str) and t.strip()]
+    cleaned = [
+        t.strip().replace("\n", " ") for t in texts if isinstance(t, str) and t.strip()
+    ]
     cleaned.sort(key=len)
     return [t[:SNIPPET_CHARS] for t in cleaned[:n]]
 
@@ -89,7 +91,11 @@ def main() -> None:
             try:
                 return fn(*args, **kwargs)
             except requests.exceptions.HTTPError as exc:
-                if exc.response is not None and exc.response.status_code == 429 and attempt < 5:
+                if (
+                    exc.response is not None
+                    and exc.response.status_code == 429
+                    and attempt < 5
+                ):
                     time.sleep(delay)
                     delay = min(delay * 2, 60)
                     continue

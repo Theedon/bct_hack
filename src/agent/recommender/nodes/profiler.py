@@ -89,7 +89,9 @@ def _fetch_user_reviews(user_id: str) -> tuple[list[dict], list[str]]:
 
     visited = sorted({r["business_id"] for r in reviews if r["business_id"]})
     sampled = (
-        _sample_reviews(reviews, _MAX_REVIEWS) if len(reviews) > _MAX_REVIEWS else reviews
+        _sample_reviews(reviews, _MAX_REVIEWS)
+        if len(reviews) > _MAX_REVIEWS
+        else reviews
     )
     return sampled, visited
 
