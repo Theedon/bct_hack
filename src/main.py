@@ -112,10 +112,6 @@ def main() -> None:
         for i, (_, row) in enumerate(sample.iterrows(), start=1):
             print(
                 f"[{i}/{total}] {row['user_name']} → {row['biz_name']} ...",
-<<<<<<< HEAD
-                end=" ",
-=======
->>>>>>> 3-add-langsmith-and-graph-loggers-for-observability
                 flush=True,
             )
             try:
