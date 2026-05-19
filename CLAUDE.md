@@ -21,6 +21,7 @@ Always use `uv run` — never `python3`, `python`, or direct invocation.
 | Build review index | `uv run python -m scripts.ingest_reviews` |
 | Build business index | `uv run python -m scripts.ingest_businesses` |
 | Run tests | `uv run pytest` |
+| Format code | `uv run black .` |
 
 **Task A evaluator flags:** `--n` rows (default 5), `--output` path, `--delay` secs between calls (default 1.0)
 
