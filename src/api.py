@@ -38,6 +38,7 @@ class RecommendRequest(BaseModel):
     user_fans: int
     query: str | None = None
     k: int = 5
+    messages: list[dict[str, str]] = []  # conversation history, newest last
 
 
 class Recommendation(BaseModel):
@@ -98,6 +99,7 @@ async def recommend(request: RecommendRequest):
             "user_fans": request.user_fans,
             "query": request.query or "",
             "k": request.k,
+            "messages": request.messages,
         }  # type: ignore
     )
     return RecommendResponse(

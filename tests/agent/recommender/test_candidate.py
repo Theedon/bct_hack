@@ -28,3 +28,29 @@ def test_build_query_collapses_manifesto_newlines():
     manifesto = "line one\nline two\nline three"
     result = _build_query(manifesto, "")
     assert "\n" not in result
+
+
+def test_build_query_prefers_last_user_message_over_query():
+    messages = [
+        {"role": "user", "content": "Show me cafes"},
+        {"role": "assistant", "content": "Here are some options..."},
+        {"role": "user", "content": "outdoor seating please"},
+    ]
+    result = _build_query("loves quiet spots", "original query", messages)
+    assert "outdoor seating" in result
+    assert "original query" not in result
+
+
+def test_build_query_falls_back_to_query_when_no_messages():
+    result = _build_query("loves quiet spots", "sushi", [])
+    assert "sushi" in result
+
+
+def test_build_query_skips_non_user_messages():
+    """Only user-role messages should drive the effective query."""
+    messages = [
+        {"role": "assistant", "content": "Here are some options..."},
+    ]
+    result = _build_query("loves quiet spots", "sushi", messages)
+    assert "sushi" in result
+    assert "Here are some options" not in result

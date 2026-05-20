@@ -96,6 +96,24 @@ def _fetch_user_reviews(user_id: str) -> tuple[list[dict], list[str]]:
     return sampled, visited
 
 
+_HISTORY_SUFFIX = """\
+
+## Conversation History
+{history}
+
+Given the above conversation history, incorporate the user's latest follow-up \
+request into the preference manifesto. If the user asked for something specific \
+(e.g. "cheaper options", "outdoor seating"), reflect that constraint in the manifesto."""
+
+
+def _format_history(messages: list[dict[str, str]]) -> str:
+    lines = []
+    for m in messages:
+        role = "User" if m["role"] == "user" else "Assistant"
+        lines.append(f"{role}: {m['content']}")
+    return "\n".join(lines)
+
+
 def profiler(state: RecommenderState) -> dict:
     metrics = _build_metrics(state)
     reviews, visited = _fetch_user_reviews(state["user_id"])
@@ -112,6 +130,10 @@ def profiler(state: RecommenderState) -> dict:
         content = metrics
         system_prompt = _SYSTEM_PROMPT_COLD
         cold_start = True
+
+    messages = state.get("messages") or []
+    if messages:
+        content += _HISTORY_SUFFIX.format(history=_format_history(messages))
 
     response = _llm.invoke(
         [SystemMessage(content=system_prompt), HumanMessage(content=content)]
