@@ -26,6 +26,7 @@ class AgentState(TypedDict):
     # Retriever node outputs
     retrieved_reviews: list[dict]
     new_experience: bool
+    business_context: str
 
     # Reasoner node outputs
     reasoning_log: str
