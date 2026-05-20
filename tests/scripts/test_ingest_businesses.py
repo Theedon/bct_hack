@@ -7,7 +7,7 @@ Demonstrated patterns:
 
 import pandas as pd
 
-from scripts.ingest_businesses import _top_snippets, build_documents
+from scripts.ingest_businesses import SNIPPET_CHARS, _top_snippets, build_documents
 
 
 def test_top_snippets_picks_shortest_and_truncates():
@@ -27,7 +27,7 @@ def test_top_snippets_picks_shortest_and_truncates():
 def test_top_snippets_truncates_to_80_chars():
     long_text = "x" * 200
     snippets = _top_snippets([long_text], n=1)
-    assert len(snippets[0]) == 80
+    assert len(snippets[0]) == SNIPPET_CHARS
 
 
 def test_build_documents_groups_by_business_id():

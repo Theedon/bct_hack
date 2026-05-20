@@ -7,6 +7,7 @@ convention."
 """
 
 import random
+from typing import Any
 
 import pytest
 
@@ -23,7 +24,7 @@ def _deterministic_random():
 
 
 @pytest.fixture
-def mixed_reviews() -> list[dict]:
+def mixed_reviews() -> list[dict[str, Any]]:
     """A small review list with both low (<=3) and high (>3) star buckets."""
     return [
         {
@@ -65,7 +66,7 @@ def mixed_reviews() -> list[dict]:
 
 
 @pytest.fixture
-def sample_candidates() -> list[dict]:
+def sample_candidates() -> list[dict[str, Any]]:
     """Three candidate businesses shaped like the real `candidate` node output."""
     return [
         {

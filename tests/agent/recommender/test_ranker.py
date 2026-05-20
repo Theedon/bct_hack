@@ -94,7 +94,7 @@ def test_ranker_drops_out_of_range_candidate_numbers(monkeypatch, sample_candida
     assert result["recommendations"][0]["business_id"] == "biz-001"
 
 
-def test_ranker_returns_empty_when_no_candidates(monkeypatch):
+def test_ranker_returns_empty_when_no_candidates():
     """No candidates → no LLM call, no recommendations.
 
     We don't even set up a stub LLM here because the ranker should
