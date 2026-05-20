@@ -64,7 +64,11 @@ def _fetch_user_reviews(user_id: str) -> list[dict]:
             {"text": doc, "stars": meta["stars_review"], "biz_name": meta["biz_name"]}
             for doc, meta in zip(results["documents"], results["metadatas"])
         ]
-        return _sample_reviews(reviews, _MAX_REVIEWS) if len(reviews) > _MAX_REVIEWS else reviews
+        return (
+            _sample_reviews(reviews, _MAX_REVIEWS)
+            if len(reviews) > _MAX_REVIEWS
+            else reviews
+        )
     except Exception:
         return []
 
@@ -77,7 +81,9 @@ def analyst(state: AgentState) -> dict:
         samples = "\n\n".join(
             f"[{r['stars']}/5 — {r['biz_name']}]\n{r['text']}" for r in reviews
         )
-        content = f"{metrics}\n\nWriting Samples ({len(reviews)} reviews found):\n{samples}"
+        content = (
+            f"{metrics}\n\nWriting Samples ({len(reviews)} reviews found):\n{samples}"
+        )
     else:
         content = metrics
 

@@ -46,8 +46,10 @@ def _extract_anchors(reviews: list[dict], max_anchors: int = 5) -> list[str]:
                 score += 2
             if fragment.lower().startswith("i "):
                 score += 1
-            if any(w.lower() in ("never", "always", "must", "love", "hate", "absolutely")
-                   for w in words):
+            if any(
+                w.lower() in ("never", "always", "must", "love", "hate", "absolutely")
+                for w in words
+            ):
                 score += 1
             candidates.append((score, fragment))
 
@@ -71,13 +73,17 @@ def _avg_word_count(reviews: list[dict]) -> int:
     return round(sum(counts) / len(counts))
 
 
-def _build_system_prompt(avg_words: int, anchors: list[str], predicted_rating: float, categories: str) -> str:
+def _build_system_prompt(
+    avg_words: int, anchors: list[str], predicted_rating: float, categories: str
+) -> str:
     anchor_rule = (
-        "2. Anchor phrases: Naturally weave in 1–3 of these phrases extracted from "
-        "their past writing (do not force all of them):\n"
-        + "\n".join(f'   - "{a}"' for a in anchors)
-    ) if anchors else (
-        "2. No anchor phrases available — rely entirely on the manifesto tone."
+        (
+            "2. Anchor phrases: Naturally weave in 1–3 of these phrases extracted from "
+            "their past writing (do not force all of them):\n"
+            + "\n".join(f'   - "{a}"' for a in anchors)
+        )
+        if anchors
+        else ("2. No anchor phrases available — rely entirely on the manifesto tone.")
     )
 
     return (
@@ -117,7 +123,9 @@ def drafter(state: AgentState) -> dict:
     anchors = _extract_anchors(reviews) if reviews else []
     avg_words = _avg_word_count(reviews)
 
-    system_prompt = _build_system_prompt(avg_words, anchors, state["predicted_rating"], state["categories"])
+    system_prompt = _build_system_prompt(
+        avg_words, anchors, state["predicted_rating"], state["categories"]
+    )
     samples = _format_samples(state)
 
     content = (

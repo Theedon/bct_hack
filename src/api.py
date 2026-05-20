@@ -75,7 +75,7 @@ async def generate_review(request: ReviewRequest):
             "biz_name": request.biz_name,
             "categories": request.categories,
             "biz_attributes_clean": request.biz_attributes_clean,
-        } # type: ignore
+        }  # type: ignore
     )
     return ReviewResponse(
         predicted_rating=state["predicted_rating"],
@@ -98,7 +98,7 @@ async def recommend(request: RecommendRequest):
             "user_fans": request.user_fans,
             "query": request.query or "",
             "k": request.k,
-        } # type: ignore
+        }  # type: ignore
     )
     return RecommendResponse(
         recommendations=[Recommendation(**r) for r in state["recommendations"]],

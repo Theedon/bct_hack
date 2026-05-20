@@ -13,35 +13,57 @@ from src.agent.recommender.graph import recommend_graph
 TEST_CSV = "data/yelp_review/test.csv"
 
 OUTPUT_COLUMNS = [
-    "user_id", "user_name", "user_review_count", "average_stars",
-    "user_elite_count", "user_fans",
+    "user_id",
+    "user_name",
+    "user_review_count",
+    "average_stars",
+    "user_elite_count",
+    "user_fans",
     "cold_start",
-    "num_test_businesses", "num_liked_test_businesses",
-    "hit_at_k", "liked_hit_at_k",
+    "num_test_businesses",
+    "num_liked_test_businesses",
+    "hit_at_k",
+    "liked_hit_at_k",
     "recommendations",
-    "user_manifesto", "reasoning_log",
+    "user_manifesto",
+    "reasoning_log",
 ]
 
 
 def _run_agent(row: pd.Series, k: int) -> dict:
-    return recommend_graph.invoke({  # type: ignore[arg-type]
-        "user_id": str(row["user_id"]),
-        "user_name": str(row["user_name"]),
-        "user_review_count": int(row["user_review_count"]),
-        "average_stars": float(row["average_stars"]),
-        "user_elite_count": int(row["user_elite_count"]),
-        "user_fans": int(row["user_fans"]),
-        "query": "",
-        "k": k,
-    })
+    return recommend_graph.invoke(
+        {  # type: ignore[arg-type]
+            "user_id": str(row["user_id"]),
+            "user_name": str(row["user_name"]),
+            "user_review_count": int(row["user_review_count"]),
+            "average_stars": float(row["average_stars"]),
+            "user_elite_count": int(row["user_elite_count"]),
+            "user_fans": int(row["user_fans"]),
+            "query": "",
+            "k": k,
+        }
+    )
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Batch-evaluate Task B recommender on test users.")
-    parser.add_argument("--n", type=int, default=None, help="Number of users to evaluate (default: all)")
-    parser.add_argument("--k", type=int, default=5, help="Recommendations per user (default: 5)")
-    parser.add_argument("--output", type=str, default="results/output_recommend.csv", help="Output CSV path")
-    parser.add_argument("--delay", type=float, default=1.0, help="Seconds between users (default: 1.0)")
+    parser = argparse.ArgumentParser(
+        description="Batch-evaluate Task B recommender on test users."
+    )
+    parser.add_argument(
+        "--n", type=int, default=None, help="Number of users to evaluate (default: all)"
+    )
+    parser.add_argument(
+        "--k", type=int, default=5, help="Recommendations per user (default: 5)"
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="results/output_recommend.csv",
+        help="Output CSV path",
+    )
+    parser.add_argument(
+        "--delay", type=float, default=1.0, help="Seconds between users (default: 1.0)"
+    )
     args = parser.parse_args()
 
     output_path = Path(args.output)
@@ -68,7 +90,9 @@ def main() -> None:
 
             all_test_biz = set(user_rows["business_id"].astype(str).tolist())
             liked_test_biz = set(
-                user_rows[user_rows["stars_review"] >= 4]["business_id"].astype(str).tolist()
+                user_rows[user_rows["stars_review"] >= 4]["business_id"]
+                .astype(str)
+                .tolist()
             )
 
             print(
@@ -102,7 +126,9 @@ def main() -> None:
                     "user_manifesto": state.get("user_manifesto", ""),
                     "reasoning_log": state.get("reasoning_log", ""),
                 }
-                print(f"done  hit={hit}  liked_hit={liked_hit}  cold={state.get('cold_start')}")
+                print(
+                    f"done  hit={hit}  liked_hit={liked_hit}  cold={state.get('cold_start')}"
+                )
             except Exception as e:
                 print(f"ERROR: {e}")
                 row = {
