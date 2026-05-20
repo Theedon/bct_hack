@@ -40,6 +40,9 @@ def build_documents(df: pd.DataFrame) -> list[Document]:
         categories = str(first.get("categories", ""))
         attributes = str(first.get("biz_attributes_clean", ""))[:ATTRIBUTE_CHARS]
         biz_stars = float(first.get("biz_stars", 0))
+        biz_address = str(first.get("biz_address", ""))
+        biz_city = str(first.get("biz_city", ""))
+        biz_state = str(first.get("biz_state", ""))
 
         review_texts = group["text"].dropna().astype(str).tolist()
         snippets = _top_snippets(review_texts)
@@ -49,9 +52,11 @@ def build_documents(df: pd.DataFrame) -> list[Document]:
         avg_user_stars = float(review_stars.mean()) if len(review_stars) else 0.0
 
         page_content = (
-            f"Name: {biz_name} | "
-            f"Category: {categories} | "
-            f"Attributes: {attributes} | "
+            f"Name: {biz_name}\n"
+            f"Category: {categories}\n"
+            f"Location: {biz_address}, {biz_city}, {biz_state}\n"
+            f"Average User Stars: {round(avg_user_stars, 2)} (from {len(group)} reviews)\n"
+            f"Attributes: {attributes}\n"
             f"Vibe: {vibe}"
         )
 
@@ -63,6 +68,9 @@ def build_documents(df: pd.DataFrame) -> list[Document]:
                     "biz_name": biz_name,
                     "categories": categories,
                     "biz_attributes_clean": attributes,
+                    "biz_address": biz_address,
+                    "biz_city": biz_city,
+                    "biz_state": biz_state,
                     "biz_stars": biz_stars,
                     "avg_user_stars": round(avg_user_stars, 2),
                     "review_count": int(len(group)),
