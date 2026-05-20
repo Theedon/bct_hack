@@ -16,7 +16,8 @@ from src.core.embeddings import GeminiEmbeddings
 from src.core.settings import settings
 from src.core.vectorstore import BUSINESS_COLLECTION
 
-CSV_PATH = "data/yelp_review/train.csv"
+TRAIN_CSV = "data/yelp_review/train.csv"
+TEST_CSV = "data/yelp_review/test.csv"
 BATCH_SIZE = 100
 MAX_SNIPPETS = 3
 SNIPPET_CHARS = 80
@@ -55,7 +56,6 @@ def build_documents(df: pd.DataFrame) -> list[Document]:
             f"Name: {biz_name}\n"
             f"Category: {categories}\n"
             f"Location: {biz_address}, {biz_city}, {biz_state}\n"
-            f"Average User Stars: {round(avg_user_stars, 2)} (from {len(group)} reviews)\n"
             f"Attributes: {attributes}\n"
             f"Vibe: {vibe}"
         )
@@ -81,9 +81,23 @@ def build_documents(df: pd.DataFrame) -> list[Document]:
 
 
 def main() -> None:
-    print(f"Loading {CSV_PATH}...")
-    df = pd.read_csv(CSV_PATH)
-    print(f"  {len(df)} review rows loaded.")
+    print(f"Loading {TRAIN_CSV} and {TEST_CSV}...")
+    df_train = pd.read_csv(TRAIN_CSV)
+    df_test = pd.read_csv(TEST_CSV)
+
+    # We want to exclude the actual text from the test set when building vibes,
+    # to avoid leaking the ground-truth review to the agent. So we replace the text
+    # for test reviews with NaN before grouping, or we can just concatenate.
+    # The user asked for "aggregated snippets from other users". Since the test
+    # businesses ONLY exist in test.csv with 1 review, they will have no vibe snippets
+    # if we exclude it. We'll concatenate normally so the business metadata is captured.
+    df_test_clean = df_test.copy()
+    df_test_clean["text"] = float("nan")
+    df_test_clean["stars_review"] = float("nan")
+
+    df = pd.concat([df_train, df_test_clean], ignore_index=True)
+
+    print(f"  {len(df)} total review rows loaded.")
 
     docs = build_documents(df)
     total = len(docs)

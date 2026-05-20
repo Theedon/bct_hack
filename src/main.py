@@ -34,6 +34,7 @@ OUTPUT_COLUMNS = [
     "draft_review",
     "user_manifesto",
     "reasoning_log",
+    "business_context",
     "new_experience",
     "retrieved_reviews",
 ]
@@ -136,6 +137,7 @@ def main() -> None:
                         "draft_review": state["draft_review"],
                         "user_manifesto": state["user_manifesto"],
                         "reasoning_log": state["reasoning_log"],
+                        "business_context": state.get("business_context", ""),
                         "new_experience": state["new_experience"],
                         "retrieved_reviews": json.dumps(state["retrieved_reviews"]),
                     }

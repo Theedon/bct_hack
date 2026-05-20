@@ -98,7 +98,9 @@ def _build_system_prompt(
         "menu items, dishes, or factual details from the Writing Samples into the new review.\n"
         f"4. Justify the rating: Use the Reasoning Trace to explain the 'why' behind {predicted_rating} stars "
         "— but express it in the user's voice, not an analyst's voice.\n"
-        "5. Be specific: Mention concrete attributes of the target business (e.g. WiFi, parking, price range). "
+        "5. Be specific and factual: Mention concrete attributes of the target business (e.g. WiFi, parking, price range, location). "
+        "You MUST ground your review in the reality of the Target Business Context. Mention actual dishes, themes, or vibes described by other users. "
+        "DO NOT invent menu items or scenarios that are not supported by the business context. "
         "No generic filler like 'This place was great.' If you cannot be specific, be vague in the user's "
         "natural voice — never use placeholder text like '[mention dish here]' or bracketed instructions.\n"
         "6. Do not break character. Write as the user, not about the user.\n"
@@ -134,6 +136,7 @@ def drafter(state: AgentState) -> dict:
         f"## Reasoning Trace\n{state['reasoning_log']}\n\n"
         f"## Target\n"
         f"Business: {state['biz_name']}\n"
+        f"Context & Facts: {state.get('business_context', 'No extra context available')}\n"
         f"Rating to justify: {state['predicted_rating']}/5"
     )
     output: DrafterOutput = _llm.invoke(  # type: ignore[assignment]

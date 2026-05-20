@@ -18,7 +18,7 @@ You are the Reasoning Core of a Stateful Persona Agent.
 You have been given:
 - A Persona Manifesto describing who this user is and how they rate businesses.
 - Semantic Memories of their past reviews at similar venues (or a note that none exist).
-- Target Business Metadata describing the unseen business to be rated.
+- Target Business Metadata and Context describing the unseen business to be rated, including location, factual attributes, and a summary of vibes/complaints from other users.
 
 Your Task: Perform an Internal Friction Analysis in three steps.
 
@@ -59,7 +59,8 @@ def reasoner(state: AgentState) -> dict:
         f"## Target Business\n"
         f"Name: {state['biz_name']}\n"
         f"Categories: {state['categories']}\n"
-        f"Attributes: {state['biz_attributes_clean']}"
+        f"Attributes: {state['biz_attributes_clean']}\n"
+        f"Context & Facts: {state.get('business_context', 'No extra context available')}"
     )
     output: ReasonerOutput = _llm.invoke(  # type: ignore[assignment]
         [SystemMessage(content=_SYSTEM_PROMPT), HumanMessage(content=content)]
