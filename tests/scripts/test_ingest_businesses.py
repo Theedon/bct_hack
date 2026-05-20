@@ -15,8 +15,8 @@ def test_top_snippets_picks_shortest_and_truncates():
         "short one",
         "this is a much, much longer review that should not be the first pick",
         "tiny",
-        "",            # filtered out (empty after strip)
-        "   ",         # filtered out (whitespace only)
+        "",  # filtered out (empty after strip)
+        "   ",  # filtered out (whitespace only)
         "medium length review here",
     ]
     snippets = _top_snippets(texts, n=3)
@@ -35,19 +35,31 @@ def test_build_documents_groups_by_business_id():
     df = pd.DataFrame(
         [
             {
-                "business_id": "biz-A", "biz_name": "Alpha", "categories": "Cafe",
-                "biz_attributes_clean": "WiFi: free", "biz_stars": 4.5,
-                "stars_review": 5.0, "text": "loved it",
+                "business_id": "biz-A",
+                "biz_name": "Alpha",
+                "categories": "Cafe",
+                "biz_attributes_clean": "WiFi: free",
+                "biz_stars": 4.5,
+                "stars_review": 5.0,
+                "text": "loved it",
             },
             {
-                "business_id": "biz-A", "biz_name": "Alpha", "categories": "Cafe",
-                "biz_attributes_clean": "WiFi: free", "biz_stars": 4.5,
-                "stars_review": 3.0, "text": "meh",
+                "business_id": "biz-A",
+                "biz_name": "Alpha",
+                "categories": "Cafe",
+                "biz_attributes_clean": "WiFi: free",
+                "biz_stars": 4.5,
+                "stars_review": 3.0,
+                "text": "meh",
             },
             {
-                "business_id": "biz-B", "biz_name": "Beta", "categories": "Bar",
-                "biz_attributes_clean": "Noise: loud", "biz_stars": 3.8,
-                "stars_review": 4.0, "text": "fine",
+                "business_id": "biz-B",
+                "biz_name": "Beta",
+                "categories": "Bar",
+                "biz_attributes_clean": "Noise: loud",
+                "biz_stars": 3.8,
+                "stars_review": 4.0,
+                "text": "fine",
             },
         ]
     )

@@ -26,11 +26,41 @@ def _deterministic_random():
 def mixed_reviews() -> list[dict]:
     """A small review list with both low (<=3) and high (>3) star buckets."""
     return [
-        {"stars": 1, "text": "Awful", "biz_name": "A", "categories": "X", "business_id": "a"},
-        {"stars": 2, "text": "Meh", "biz_name": "B", "categories": "X", "business_id": "b"},
-        {"stars": 3, "text": "Okay", "biz_name": "C", "categories": "X", "business_id": "c"},
-        {"stars": 4, "text": "Good", "biz_name": "D", "categories": "Y", "business_id": "d"},
-        {"stars": 5, "text": "Loved it!", "biz_name": "E", "categories": "Y", "business_id": "e"},
+        {
+            "stars": 1,
+            "text": "Awful",
+            "biz_name": "A",
+            "categories": "X",
+            "business_id": "a",
+        },
+        {
+            "stars": 2,
+            "text": "Meh",
+            "biz_name": "B",
+            "categories": "X",
+            "business_id": "b",
+        },
+        {
+            "stars": 3,
+            "text": "Okay",
+            "biz_name": "C",
+            "categories": "X",
+            "business_id": "c",
+        },
+        {
+            "stars": 4,
+            "text": "Good",
+            "biz_name": "D",
+            "categories": "Y",
+            "business_id": "d",
+        },
+        {
+            "stars": 5,
+            "text": "Loved it!",
+            "biz_name": "E",
+            "categories": "Y",
+            "business_id": "e",
+        },
     ]
 
 

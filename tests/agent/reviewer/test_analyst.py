@@ -14,7 +14,11 @@ from src.agent.reviewer.nodes.analyst import _sample_reviews
 
 def test_sample_reviews_returns_all_when_n_exceeds_input():
     """If you ask for 10 reviews from a list of 3, you get back at most 3."""
-    reviews = [{"stars": 4, "text": "x"}, {"stars": 5, "text": "y"}, {"stars": 2, "text": "z"}]
+    reviews = [
+        {"stars": 4, "text": "x"},
+        {"stars": 5, "text": "y"},
+        {"stars": 2, "text": "z"},
+    ]
     result = _sample_reviews(reviews, n=10)
     assert len(result) == 3
 
@@ -22,7 +26,7 @@ def test_sample_reviews_returns_all_when_n_exceeds_input():
 @pytest.mark.parametrize(
     "stars_in_bucket",
     [
-        [1, 2, 3],     # all low — no high reviews
+        [1, 2, 3],  # all low — no high reviews
         [4, 4, 5, 5],  # all high — no low reviews
     ],
     ids=["all_low", "all_high"],
