@@ -6,10 +6,14 @@ from src.agent.reviewer.nodes.drafter import drafter
 from src.agent.reviewer.nodes.reasoner import reasoner
 from src.agent.reviewer.nodes.retriever import retriever
 from src.agent.reviewer.state import AgentState
+from src.core.settings import settings
 
 
 def route_critic(state: AgentState):
-    if state.get("is_approved") or state.get("revision_count", 0) >= 2:
+    if (
+        state.get("is_approved")
+        or state.get("revision_count", 0) >= settings.MAX_REVISIONS
+    ):
         return END
     return "drafter"
 

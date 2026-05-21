@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL: str = "models/gemini-embedding-2"
     CHROMA_PATH: str = "data/chroma_db"
 
+    MAX_REVISIONS: int = 2
+
     LANGCHAIN_TRACING_V2: bool = True
     LANGCHAIN_API_KEY: str = ""
     LANGCHAIN_PROJECT: str = "bct_hack"
