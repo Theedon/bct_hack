@@ -4,7 +4,7 @@ import random
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from src.agent.recommender.state import RecommenderState
-from src.core.llm import get_llm
+from src.core.llm import clean_content, get_llm
 from src.core.vectorstore import get_vectorstore
 
 _MAX_REVIEWS = 15
@@ -139,7 +139,7 @@ def profiler(state: RecommenderState) -> dict:
         [SystemMessage(content=system_prompt), HumanMessage(content=content)]
     )
     return {
-        "user_manifesto": response.content,
+        "user_manifesto": clean_content(response.content),
         "cold_start": cold_start,
         "visited_business_ids": visited,
     }

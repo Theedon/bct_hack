@@ -3,7 +3,7 @@ import random
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from src.agent.reviewer.state import AgentState
-from src.core.llm import get_llm
+from src.core.llm import clean_content, get_llm
 from src.core.vectorstore import get_vectorstore
 
 _MAX_REVIEWS = 15
@@ -90,4 +90,4 @@ def analyst(state: AgentState) -> dict:
     response = _llm.invoke(
         [SystemMessage(content=_SYSTEM_PROMPT), HumanMessage(content=content)]
     )
-    return {"user_manifesto": response.content}
+    return {"user_manifesto": clean_content(response.content)}
