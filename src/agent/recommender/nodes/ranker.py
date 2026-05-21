@@ -54,9 +54,11 @@ Rules:
 def _format_candidates(candidates: list[dict]) -> str:
     lines = []
     for i, c in enumerate(candidates, start=1):
+        location = c.get("location", "")
         lines.append(
             f"[{i}] Name: {c['biz_name']}\n"
             f"    Categories: {c['categories']}\n"
+            f"    Location: {location}\n"
             f"    Attributes: {c['biz_attributes_clean']}\n"
             f"    Yelp stars: {c['biz_stars']} | "
             f"avg reviewer stars: {c['avg_user_stars']} | "
@@ -94,6 +96,8 @@ def ranker(state: RecommenderState) -> dict:
                 "business_id": biz["business_id"],
                 "biz_name": biz["biz_name"],
                 "categories": biz["categories"],
+                "biz_city": biz.get("biz_city", ""),
+                "biz_state": biz.get("biz_state", ""),
                 "score": round(item.score, 3),
                 "rationale": item.rationale,
             }
