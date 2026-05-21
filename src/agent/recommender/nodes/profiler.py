@@ -109,8 +109,8 @@ request into the preference manifesto. If the user asked for something specific 
 def _format_history(messages: list[dict[str, str]]) -> str:
     lines = []
     for m in messages:
-        role = "User" if m["role"] == "user" else "Assistant"
-        lines.append(f"{role}: {m['content']}")
+        role = "User" if m.get("role") == "user" else "Assistant"
+        lines.append(f"{role}: {m.get('content', '')}")
     return "\n".join(lines)
 
 
