@@ -11,6 +11,7 @@ class RecommenderState(TypedDict):
     user_fans: int
     query: str
     k: int
+    messages: list[dict[str, str]]  # conversation history, newest last
 
     # Profiler outputs
     user_manifesto: str

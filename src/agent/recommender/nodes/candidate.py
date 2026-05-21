@@ -6,15 +6,35 @@ _MAX_CANDIDATES = 20
 _MANIFESTO_CHARS = 600
 
 
-def _build_query(manifesto: str, user_query: str) -> str:
+def _build_query(
+    manifesto: str,
+    user_query: str,
+    messages: list[dict[str, str]] | None = None,
+) -> str:
     manifesto_excerpt = manifesto.strip().replace("\n", " ")[:_MANIFESTO_CHARS]
-    if user_query.strip():
-        return f"{user_query.strip()} | Preferences: {manifesto_excerpt}"
+    effective_query = user_query.strip()
+    if not effective_query and messages:
+        last_user = next(
+            (
+                m.get("content", "")
+                for m in reversed(messages)
+                if m.get("role") == "user"
+            ),
+            None,
+        )
+        if last_user:
+            effective_query = last_user
+    if effective_query.strip():
+        return f"{effective_query.strip()} | Preferences: {manifesto_excerpt}"
     return f"Preferences: {manifesto_excerpt}"
 
 
 def candidate(state: RecommenderState) -> dict:
-    query = _build_query(state["user_manifesto"], state.get("query", "") or "")
+    query = _build_query(
+        state["user_manifesto"],
+        state.get("query", "") or "",
+        state.get("messages") or [],
+    )
     visited = set(state.get("visited_business_ids", []) or [])
 
     hits = get_business_vectorstore().similarity_search(query, k=_OVERFETCH_K)
