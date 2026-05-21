@@ -43,6 +43,7 @@ class RecommendRequest(BaseModel):
     user_fans: int
     query: str | None = None
     k: int = 10
+    messages: list[Message] = []
 
 
 class Recommendation(BaseModel):
