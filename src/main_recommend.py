@@ -84,7 +84,7 @@ def main() -> None:
         "--n", type=int, default=None, help="Number of users to evaluate (default: all)"
     )
     parser.add_argument(
-        "--k", type=int, default=5, help="Recommendations per user (default: 5)"
+        "--k", type=int, default=10, help="Recommendations per user (default: 10)"
     )
     parser.add_argument(
         "--output",

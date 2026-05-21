@@ -37,7 +37,7 @@ class RecommendRequest(BaseModel):
     user_elite_count: int
     user_fans: int
     query: str | None = None
-    k: int = 5
+    k: int = 10
 
 
 class Recommendation(BaseModel):
