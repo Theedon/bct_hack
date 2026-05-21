@@ -25,7 +25,7 @@ Always use `uv run` — never `python3`, `python`, or direct invocation.
 
 **Task A evaluator flags:** `--n` rows (default 5), `--output` path, `--delay` secs between calls (default 1.0)
 
-**Task B evaluator flags:** `--n` users (default all 315), `--k` recs per user (default 5), `--output` path, `--delay` secs between users (default 1.0)
+**Task B evaluator flags:** `--n` users (default all), `--k` recs per user (default 10), `--output` path, `--delay` secs between users (default 1.0)
 
 ## Tests
 
@@ -52,6 +52,22 @@ data/
     yelp_review/test.csv
     chroma_db/             Persisted Chroma index (gitignored)
 ```
+
+## Solution Paper
+
+`docs/task_A.md` and `docs/task_B.md` are living documents that feed into the hackathon
+solution paper. Update the relevant file whenever a task produces:
+
+- A new architectural decision (with the rationale behind it)
+- An evaluation result (metric + dataset + conditions)
+- An ablation finding (what was tried, what changed, and why)
+- A known weakness or future work item that emerged from testing
+
+Do **not** update these files for: bug fixes, CI changes, test additions, formatting, or
+refactors that do not change the system's approach or behaviour.
+
+Rule of thumb: if the finding would belong in a conference paper's Methods or Results section,
+add it. If it would only appear in a commit message, skip it.
 
 ## Key Patterns
 
