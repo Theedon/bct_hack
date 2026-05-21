@@ -30,6 +30,8 @@ def candidate(state: RecommenderState) -> dict:
                 "biz_name": h.metadata.get("biz_name", ""),
                 "categories": h.metadata.get("categories", ""),
                 "biz_attributes_clean": h.metadata.get("biz_attributes_clean", ""),
+                "biz_city": h.metadata.get("biz_city", ""),
+                "biz_state": h.metadata.get("biz_state", ""),
                 "biz_stars": h.metadata.get("biz_stars", 0.0),
                 "avg_user_stars": h.metadata.get("avg_user_stars", 0.0),
                 "review_count": h.metadata.get("review_count", 0),

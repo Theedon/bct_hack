@@ -40,6 +40,9 @@ def build_documents(df: pd.DataFrame) -> list[Document]:
         categories = str(first.get("categories", ""))
         attributes = str(first.get("biz_attributes_clean", ""))[:ATTRIBUTE_CHARS]
         biz_stars = float(first.get("biz_stars", 0))
+        biz_city = str(first.get("biz_city", ""))
+        biz_state = str(first.get("biz_state", ""))
+        location = ", ".join(filter(None, [biz_city, biz_state]))
 
         review_texts = group["text"].dropna().astype(str).tolist()
         snippets = _top_snippets(review_texts)
@@ -51,6 +54,7 @@ def build_documents(df: pd.DataFrame) -> list[Document]:
         page_content = (
             f"Name: {biz_name} | "
             f"Category: {categories} | "
+            f"Location: {location} | "
             f"Attributes: {attributes} | "
             f"Vibe: {vibe}"
         )
@@ -63,6 +67,8 @@ def build_documents(df: pd.DataFrame) -> list[Document]:
                     "biz_name": biz_name,
                     "categories": categories,
                     "biz_attributes_clean": attributes,
+                    "biz_city": biz_city,
+                    "biz_state": biz_state,
                     "biz_stars": biz_stars,
                     "avg_user_stars": round(avg_user_stars, 2),
                     "review_count": int(len(group)),
