@@ -38,8 +38,7 @@ def _ndcg_at_k(ranked_ids: list[str], relevant_ids: set[str], k: int) -> float |
         return None
     gains = [1.0 if bid in relevant_ids else 0.0 for bid in ranked_ids[:k]]
     dcg = sum(g / math.log2(i + 2) for i, g in enumerate(gains))
-    ideal = sorted(gains, reverse=True)
-    idcg = sum(g / math.log2(i + 2) for i, g in enumerate(ideal[:k]))
+    idcg = sum(1.0 / math.log2(i + 2) for i in range(min(len(relevant_ids), k)))
     return dcg / idcg if idcg > 0 else 0.0
 
 
