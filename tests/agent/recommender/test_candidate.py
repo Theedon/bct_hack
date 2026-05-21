@@ -30,15 +30,25 @@ def test_build_query_collapses_manifesto_newlines():
     assert "\n" not in result
 
 
-def test_build_query_prefers_last_user_message_over_query():
+def test_build_query_prioritizes_explicit_query_over_messages():
     messages = [
         {"role": "user", "content": "Show me cafes"},
         {"role": "assistant", "content": "Here are some options..."},
         {"role": "user", "content": "outdoor seating please"},
     ]
-    result = _build_query("loves quiet spots", "original query", messages)
+    result = _build_query("loves quiet spots", "new query", messages)
+    assert "new query" in result
+    assert "outdoor seating" not in result
+
+
+def test_build_query_falls_back_to_last_user_message_when_query_is_blank():
+    messages = [
+        {"role": "user", "content": "Show me cafes"},
+        {"role": "assistant", "content": "Here are some options..."},
+        {"role": "user", "content": "outdoor seating please"},
+    ]
+    result = _build_query("loves quiet spots", "", messages)
     assert "outdoor seating" in result
-    assert "original query" not in result
 
 
 def test_build_query_falls_back_to_query_when_no_messages():

@@ -12,10 +12,15 @@ def _build_query(
     messages: list[dict[str, str]] | None = None,
 ) -> str:
     manifesto_excerpt = manifesto.strip().replace("\n", " ")[:_MANIFESTO_CHARS]
-    effective_query = user_query
-    if messages:
+    effective_query = user_query.strip()
+    if not effective_query and messages:
         last_user = next(
-            (m["content"] for m in reversed(messages) if m["role"] == "user"), None
+            (
+                m.get("content", "")
+                for m in reversed(messages)
+                if m.get("role") == "user"
+            ),
+            None,
         )
         if last_user:
             effective_query = last_user
