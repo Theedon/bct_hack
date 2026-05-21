@@ -34,6 +34,8 @@ Always use `uv run` — never `python3`, `python`, or direct invocation.
 - Always update existing tests before committing a change to covered code
 - Prefer testing behaviour and contracts over implementation details
 - For LLM-facing components, mock the LLM and test the surrounding logic
+- Only add tests once the feature is verified working — never commit tests for broken code
+- Do not add tests just to have coverage; add them when the logic is non-trivial enough that a future change could silently break it
 
 ## Project Layout
 
