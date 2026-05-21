@@ -33,3 +33,8 @@ class AgentState(TypedDict):
 
     # Drafter node output
     draft_review: str
+
+    # Critic node output
+    critic_feedback: str
+    revision_count: int
+    is_approved: bool
