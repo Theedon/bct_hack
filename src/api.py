@@ -43,12 +43,15 @@ class RecommendRequest(BaseModel):
     user_fans: int
     query: str | None = None
     k: int = 10
+    messages: list[Message] = []
 
 
 class Recommendation(BaseModel):
     business_id: str
     biz_name: str
     categories: str
+    biz_city: str
+    biz_state: str
     score: float
     rationale: str
 
