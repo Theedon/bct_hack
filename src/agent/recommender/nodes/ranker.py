@@ -54,9 +54,7 @@ Rules:
 def _format_candidates(candidates: list[dict]) -> str:
     lines = []
     for i, c in enumerate(candidates, start=1):
-        location = ", ".join(
-            filter(None, [c.get("biz_city", ""), c.get("biz_state", "")])
-        )
+        location = c.get("location", "")
         lines.append(
             f"[{i}] Name: {c['biz_name']}\n"
             f"    Categories: {c['categories']}\n"
