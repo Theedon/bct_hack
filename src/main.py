@@ -3,8 +3,11 @@
 import argparse
 import csv
 import json
+import math
 import time
 from pathlib import Path
+
+from rouge_score import rouge_scorer
 
 import pandas as pd
 
@@ -105,6 +108,8 @@ def main() -> None:
     print(f"Running agent on {total} test examples → {output_path}")
     print(f"Delay between runs: {args.delay}s\n")
 
+    rows_written: list[dict] = []
+
     with open(output_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=OUTPUT_COLUMNS)
         writer.writeheader()
@@ -116,66 +121,89 @@ def main() -> None:
             )
             try:
                 state = _run_agent(row)
-                writer.writerow(
-                    {
-                        "user_id": row["user_id"],
-                        "user_name": row["user_name"],
-                        "user_review_count": row["user_review_count"],
-                        "average_stars": row["average_stars"],
-                        "user_elite_count": row["user_elite_count"],
-                        "user_fans": row["user_fans"],
-                        "business_id": row["business_id"],
-                        "biz_name": row["biz_name"],
-                        "biz_stars": row["biz_stars"],
-                        "categories": row["categories"],
-                        "biz_attributes_clean": row["biz_attributes_clean"],
-                        "stars_review": row["stars_review"],
-                        "date": row["date"],
-                        "actual_review": row["text"],
-                        "predicted_rating": state["predicted_rating"],
-                        "draft_review": state["draft_review"],
-                        "user_manifesto": state["user_manifesto"],
-                        "reasoning_log": state["reasoning_log"],
-                        "new_experience": state["new_experience"],
-                        "retrieved_reviews": json.dumps(state["retrieved_reviews"]),
-                    }
-                )
+                out_row = {
+                    "user_id": row["user_id"],
+                    "user_name": row["user_name"],
+                    "user_review_count": row["user_review_count"],
+                    "average_stars": row["average_stars"],
+                    "user_elite_count": row["user_elite_count"],
+                    "user_fans": row["user_fans"],
+                    "business_id": row["business_id"],
+                    "biz_name": row["biz_name"],
+                    "biz_stars": row["biz_stars"],
+                    "categories": row["categories"],
+                    "biz_attributes_clean": row["biz_attributes_clean"],
+                    "stars_review": row["stars_review"],
+                    "date": row["date"],
+                    "actual_review": row["text"],
+                    "predicted_rating": state["predicted_rating"],
+                    "draft_review": state["draft_review"],
+                    "user_manifesto": state["user_manifesto"],
+                    "reasoning_log": state["reasoning_log"],
+                    "new_experience": state["new_experience"],
+                    "retrieved_reviews": json.dumps(state["retrieved_reviews"]),
+                }
+                writer.writerow(out_row)
+                rows_written.append(out_row)
                 f.flush()
                 print(
                     f"done (predicted: {state['predicted_rating']}★  actual: {row['stars_review']}★)"
                 )
             except Exception as e:
                 print(f"ERROR: {e}")
-                writer.writerow(
-                    {
-                        "user_id": row["user_id"],
-                        "user_name": row["user_name"],
-                        "user_review_count": row["user_review_count"],
-                        "average_stars": row["average_stars"],
-                        "user_elite_count": row["user_elite_count"],
-                        "user_fans": row["user_fans"],
-                        "business_id": row["business_id"],
-                        "biz_name": row["biz_name"],
-                        "biz_stars": row["biz_stars"],
-                        "categories": row["categories"],
-                        "biz_attributes_clean": row["biz_attributes_clean"],
-                        "stars_review": row["stars_review"],
-                        "date": row["date"],
-                        "actual_review": row["text"],
-                        "predicted_rating": "",
-                        "draft_review": f"ERROR: {e}",
-                        "user_manifesto": "",
-                        "reasoning_log": "",
-                        "new_experience": "",
-                        "retrieved_reviews": "[]",
-                    }
-                )
+                error_row = {
+                    "user_id": row["user_id"],
+                    "user_name": row["user_name"],
+                    "user_review_count": row["user_review_count"],
+                    "average_stars": row["average_stars"],
+                    "user_elite_count": row["user_elite_count"],
+                    "user_fans": row["user_fans"],
+                    "business_id": row["business_id"],
+                    "biz_name": row["biz_name"],
+                    "biz_stars": row["biz_stars"],
+                    "categories": row["categories"],
+                    "biz_attributes_clean": row["biz_attributes_clean"],
+                    "stars_review": row["stars_review"],
+                    "date": row["date"],
+                    "actual_review": row["text"],
+                    "predicted_rating": "",
+                    "draft_review": f"ERROR: {e}",
+                    "user_manifesto": "",
+                    "reasoning_log": "",
+                    "new_experience": "",
+                    "retrieved_reviews": "[]",
+                }
+                writer.writerow(error_row)
+                rows_written.append(error_row)
                 f.flush()
 
             if i < total and args.delay > 0:
                 time.sleep(args.delay)
 
     print(f"\nDone. Results saved to {output_path}")
+
+    # Evaluation summary
+    valid = [r for r in rows_written if r["predicted_rating"] != ""]
+    if valid:
+        predicted = [float(r["predicted_rating"]) for r in valid]
+        actual = [float(r["stars_review"]) for r in valid]
+        n = len(valid)
+        rmse = math.sqrt(sum((p - a) ** 2 for p, a in zip(predicted, actual)) / n)
+        mae = sum(abs(p - a) for p, a in zip(predicted, actual)) / n
+
+        scorer = rouge_scorer.RougeScorer(["rougeL"], use_stemmer=True)
+        rouge_scores = [
+            scorer.score(r["actual_review"], r["draft_review"])["rougeL"].fmeasure
+            for r in valid
+            if r["draft_review"] and not str(r["draft_review"]).startswith("ERROR")
+        ]
+        mean_rouge_l = sum(rouge_scores) / len(rouge_scores) if rouge_scores else 0.0
+
+        print(f"\n{'─' * 42}")
+        print(f"Rating  RMSE    : {rmse:.4f}  (n={n})")
+        print(f"Rating  MAE     : {mae:.4f}")
+        print(f"Text    ROUGE-L : {mean_rouge_l:.4f}")
+        print(f"{'─' * 42}")
 
 
 if __name__ == "__main__":
