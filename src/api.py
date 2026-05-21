@@ -29,6 +29,11 @@ class ReviewResponse(BaseModel):
     new_experience: bool
 
 
+class Message(BaseModel):
+    role: str
+    content: str
+
+
 class RecommendRequest(BaseModel):
     user_id: str
     user_name: str
@@ -38,7 +43,7 @@ class RecommendRequest(BaseModel):
     user_fans: int
     query: str | None = None
     k: int = 5
-    messages: list[dict[str, str]] = []  # conversation history, newest last
+    messages: list[Message] = []
 
 
 class Recommendation(BaseModel):
@@ -99,7 +104,7 @@ async def recommend(request: RecommendRequest):
             "user_fans": request.user_fans,
             "query": request.query or "",
             "k": request.k,
-            "messages": request.messages,
+            "messages": [m.model_dump() for m in request.messages],
         }  # type: ignore
     )
     return RecommendResponse(
