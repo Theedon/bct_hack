@@ -151,30 +151,30 @@ def main() -> None:
                 )
             except Exception as e:
                 print(f"ERROR: {e}")
-                writer.writerow(
-                    {
-                        "user_id": row["user_id"],
-                        "user_name": row["user_name"],
-                        "user_review_count": row["user_review_count"],
-                        "average_stars": row["average_stars"],
-                        "user_elite_count": row["user_elite_count"],
-                        "user_fans": row["user_fans"],
-                        "business_id": row["business_id"],
-                        "biz_name": row["biz_name"],
-                        "biz_stars": row["biz_stars"],
-                        "categories": row["categories"],
-                        "biz_attributes_clean": row["biz_attributes_clean"],
-                        "stars_review": row["stars_review"],
-                        "date": row["date"],
-                        "actual_review": row["text"],
-                        "predicted_rating": "",
-                        "draft_review": f"ERROR: {e}",
-                        "user_manifesto": "",
-                        "reasoning_log": "",
-                        "new_experience": "",
-                        "retrieved_reviews": "[]",
-                    }
-                )
+                error_row = {
+                    "user_id": row["user_id"],
+                    "user_name": row["user_name"],
+                    "user_review_count": row["user_review_count"],
+                    "average_stars": row["average_stars"],
+                    "user_elite_count": row["user_elite_count"],
+                    "user_fans": row["user_fans"],
+                    "business_id": row["business_id"],
+                    "biz_name": row["biz_name"],
+                    "biz_stars": row["biz_stars"],
+                    "categories": row["categories"],
+                    "biz_attributes_clean": row["biz_attributes_clean"],
+                    "stars_review": row["stars_review"],
+                    "date": row["date"],
+                    "actual_review": row["text"],
+                    "predicted_rating": "",
+                    "draft_review": f"ERROR: {e}",
+                    "user_manifesto": "",
+                    "reasoning_log": "",
+                    "new_experience": "",
+                    "retrieved_reviews": "[]",
+                }
+                writer.writerow(error_row)
+                rows_written.append(error_row)
                 f.flush()
 
             if i < total and args.delay > 0:
