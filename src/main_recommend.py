@@ -3,6 +3,7 @@
 import argparse
 import csv
 import json
+import math
 import time
 from pathlib import Path
 
@@ -24,10 +25,21 @@ OUTPUT_COLUMNS = [
     "num_liked_test_businesses",
     "hit_at_k",
     "liked_hit_at_k",
+    "ndcg_at_k",
     "recommendations",
     "user_manifesto",
     "reasoning_log",
 ]
+
+
+def _ndcg_at_k(ranked_ids: list[str], relevant_ids: set[str], k: int) -> float | None:
+    """Binary NDCG@k. Returns None when there are no relevant items (unevaluable)."""
+    if not relevant_ids:
+        return None
+    gains = [1.0 if bid in relevant_ids else 0.0 for bid in ranked_ids[:k]]
+    dcg = sum(g / math.log2(i + 2) for i, g in enumerate(gains))
+    idcg = sum(1.0 / math.log2(i + 2) for i in range(min(len(relevant_ids), k)))
+    return dcg / idcg if idcg > 0 else 0.0
 
 
 def _run_agent(row: pd.Series, k: int) -> dict:
@@ -72,7 +84,7 @@ def main() -> None:
         "--n", type=int, default=None, help="Number of users to evaluate (default: all)"
     )
     parser.add_argument(
-        "--k", type=int, default=5, help="Recommendations per user (default: 5)"
+        "--k", type=int, default=10, help="Recommendations per user (default: 10)"
     )
     parser.add_argument(
         "--output",
@@ -124,9 +136,11 @@ def main() -> None:
                 state = _run_agent(first, args.k)
                 recs = state.get("recommendations", [])
                 rec_ids = {r["business_id"] for r in recs}
+                ranked_ids = [r["business_id"] for r in recs]
 
                 hit = int(bool(rec_ids & all_test_biz))
                 liked_hit = int(bool(rec_ids & liked_test_biz))
+                ndcg = _ndcg_at_k(ranked_ids, liked_test_biz, args.k)
 
                 row = {
                     "user_id": user_id,
@@ -140,12 +154,14 @@ def main() -> None:
                     "num_liked_test_businesses": len(liked_test_biz),
                     "hit_at_k": hit,
                     "liked_hit_at_k": liked_hit,
+                    "ndcg_at_k": "" if ndcg is None else round(ndcg, 4),
                     "recommendations": json.dumps(recs),
                     "user_manifesto": state.get("user_manifesto", ""),
                     "reasoning_log": state.get("reasoning_log", ""),
                 }
+                ndcg_str = f"{ndcg:.4f}" if ndcg is not None else "n/a"
                 print(
-                    f"done  hit={hit}  liked_hit={liked_hit}  cold={state.get('cold_start')}"
+                    f"done  hit={hit}  liked_hit={liked_hit}  ndcg={ndcg_str}  cold={state.get('cold_start')}"
                 )
             except Exception as e:
                 print(f"ERROR: {e}")
@@ -161,6 +177,7 @@ def main() -> None:
                     "num_liked_test_businesses": len(liked_test_biz),
                     "hit_at_k": "",
                     "liked_hit_at_k": "",
+                    "ndcg_at_k": "",
                     "recommendations": "[]",
                     "user_manifesto": f"ERROR: {e}",
                     "reasoning_log": "",
@@ -183,6 +200,12 @@ def main() -> None:
             return "n/a"
         return f"{sum(int(r[key]) for r in subset) / len(subset):.1%} ({len(subset)} users)"
 
+    def _mean_ndcg(subset: list[dict]) -> str:
+        scores = [float(r["ndcg_at_k"]) for r in subset if r["ndcg_at_k"] != ""]
+        if not scores:
+            return "n/a"
+        return f"{sum(scores) / len(scores):.4f} ({len(scores)} users)"
+
     print(f"\n{'─' * 50}")
     print(f"hit@{args.k}        overall : {_hit_rate(valid, 'hit_at_k')}")
     print(f"hit@{args.k}        warm    : {_hit_rate(warm, 'hit_at_k')}")
@@ -190,6 +213,9 @@ def main() -> None:
     print(f"liked_hit@{args.k}  overall : {_hit_rate(valid, 'liked_hit_at_k')}")
     print(f"liked_hit@{args.k}  warm    : {_hit_rate(warm, 'liked_hit_at_k')}")
     print(f"liked_hit@{args.k}  cold    : {_hit_rate(cold, 'liked_hit_at_k')}")
+    print(f"ndcg@{args.k}       overall : {_mean_ndcg(valid)}")
+    print(f"ndcg@{args.k}       warm    : {_mean_ndcg(warm)}")
+    print(f"ndcg@{args.k}       cold    : {_mean_ndcg(cold)}")
     print(f"{'─' * 50}")
     print(f"Results saved to {output_path}")
 
