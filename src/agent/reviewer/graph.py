@@ -12,7 +12,7 @@ from src.core.settings import settings
 def route_critic(state: AgentState) -> str:
     if (
         state.get("is_approved")
-        or state.get("revision_count", 0) >= settings.MAX_REVISIONS
+        or state.get("revision_count", 0) > settings.MAX_REVISIONS
     ):
         return END
     return "drafter"
