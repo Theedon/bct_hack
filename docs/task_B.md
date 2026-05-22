@@ -207,8 +207,10 @@ explicit query, multi-turn refinement, and Nigerian contextualisation scenarios.
 - **First-N-rows slice**: Introduced date/cluster bias. Replaced with random sampling.
 - **IDCG from retrieved gains**: Inflated NDCG scores. Fixed to use ground-truth relevant count.
 - **Business vectorstore built from train.csv only**: 83.3% of test businesses (353/424) were
-  not in the index, making it structurally impossible to hit them. Fixed by including test.csv
-  businesses in `ingest_businesses.py` (pool: 3,997 → 4,350).
+  not in the index, making it structurally impossible to hit them. Fixed by including test-only
+  businesses in `ingest_businesses.py` (pool: 3,997 → 4,350). Their `text` and `stars_review`
+  columns are nulled before ingest so held-out review content does not leak into the vectorstore
+  embeddings or `avg_user_stars` metadata.
 
 ---
 
