@@ -4,6 +4,7 @@ import sys
 import time
 from pathlib import Path
 
+import chromadb
 import pandas as pd
 import requests
 from langchain_chroma import Chroma
@@ -85,6 +86,13 @@ def build_documents(df: pd.DataFrame) -> list[Document]:
 
 
 def main() -> None:
+    client = chromadb.PersistentClient(path=settings.CHROMA_PATH)
+    try:
+        client.delete_collection(BUSINESS_COLLECTION)
+        print(f"Dropped existing '{BUSINESS_COLLECTION}' collection.")
+    except Exception:
+        pass
+
     print(f"Loading {TRAIN_CSV} + {TEST_CSV}...")
     train_df = pd.read_csv(TRAIN_CSV)
     test_df = pd.read_csv(TEST_CSV)
