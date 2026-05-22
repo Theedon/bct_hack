@@ -106,6 +106,9 @@ the limit, the best draft produced so far is returned regardless of critic verdi
 is up to `MAX_REVISIONS` additional LLM calls per request; the quality benefit has not yet been
 quantified against the baseline (see Known Weaknesses).
 
+### Nigerian Contextualization (Bonus)
+An optional `nigerian_mode` flag is supported across the pipeline. When enabled, the analyst frames the persona manifesto using Nigerian archetypes (e.g., 'Lagos Foodie', 'Mainland Hustler'), and the drafter injects Nigerian English phrasing and Pidgin constructs (e.g., 'abeg', 'jara') into the review. This satisfies the hackathon bonus criterion for culturally localized persona simulation.
+
 ---
 
 ## Data Pipeline
@@ -190,9 +193,10 @@ and the reasoner defaults to middling predictions when uncertain.
   (semantic similarity) would be a fairer measure of text quality.
 - **Model**: Currently using Gemini 2.5 Flash Lite. Upgrading to a stronger model for the
   reasoner node specifically would likely improve rating calibration.
-- **Nigerian context**: The Yelp dataset is US-centric. Adapting to Nigerian businesses and
-  review conventions (e.g. Lagos restaurant culture, local payment norms) would require a
-  Nigeria-specific dataset or few-shot examples grounding the agent in local context.
+- **Nigerian context**: While the `nigerian_mode` flag forces the agent to adopt a Nigerian voice, the
+  underlying Yelp dataset remains US-centric. Adapting the system fully to Nigerian businesses would
+  require a Nigeria-specific dataset to prevent a mismatch between the cultural tone and the
+  actual business attributes.
 - **Critic loop latency**: Each revision cycle adds one critic call + one drafter call. With
   `MAX_REVISIONS=2` this means up to 4 extra LLM calls in the worst case. Latency impact has not
   been measured; may matter if the endpoint is used in a real-time context.
