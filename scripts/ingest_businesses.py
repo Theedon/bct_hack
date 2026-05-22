@@ -86,9 +86,20 @@ def build_documents(df: pd.DataFrame) -> list[Document]:
 
 def main() -> None:
     print(f"Loading {TRAIN_CSV} + {TEST_CSV}...")
-    df = pd.concat([pd.read_csv(TRAIN_CSV), pd.read_csv(TEST_CSV)], ignore_index=True)
+    train_df = pd.read_csv(TRAIN_CSV)
+    test_df = pd.read_csv(TEST_CSV)
+    # Include test-only businesses for catalog coverage but strip their review content
+    # so held-out ratings and text don't leak into the vectorstore embeddings.
+    test_only = (
+        test_df[~test_df["business_id"].isin(train_df["business_id"])]
+        .drop_duplicates("business_id")
+        .copy()
+    )
+    test_only[["text", "stars_review"]] = None
+    df = pd.concat([train_df, test_only], ignore_index=True)
     print(
-        f"  {len(df)} review rows loaded ({df['business_id'].nunique()} unique businesses)."
+        f"  {len(train_df)} train rows + {len(test_only)} test-only businesses "
+        f"({df['business_id'].nunique()} unique businesses total)."
     )
 
     docs = build_documents(df)
