@@ -15,10 +15,12 @@ Given a user's review history and a target business they have not reviewed, simu
 
 ## Architecture
 
-Four-node LangGraph pipeline:
+Five-node LangGraph pipeline with a reflection loop:
 
 ```
-analyst → retriever → reasoner → drafter
+analyst → retriever → reasoner → drafter → critic ─┐
+                                           ↑         │ approved or
+                                           └─────────┘ max revisions reached → END
 ```
 
 ### analyst
@@ -47,7 +49,23 @@ food → target is Pakistani → likely positive).
 ### drafter
 Takes the persona manifesto, predicted rating, reasoning log, and reference reviews. Generates
 the written review in the user's voice — matching their vocabulary, sentence length, tone
-(enthusiastic vs critical vs neutral), and typical structural patterns.
+(enthusiastic vs critical vs neutral), and typical structural patterns. On revision passes, the
+prompt is extended with the previous draft and the critic's specific feedback, instructing the
+model to rewrite rather than start from scratch.
+
+### critic
+Evaluates the draft review against four criteria using structured output (`is_approved: bool`,
+`feedback: str`):
+1. **Behavioral fidelity** — does the review sound like this user (tone, vocabulary, rating bias)?
+2. **Hallucination** — does the review invent specific details (dishes, features) not grounded in
+   the reasoning trace or business categories?
+3. **Generic AI-isms** — does the review end with hollow conclusions ("Overall, a great
+   experience!") or use robotic, impersonal language?
+4. **Target match** — does the review accurately describe the target business, not some other
+   business?
+
+If `is_approved` is false, the graph routes back to the drafter with the feedback attached. If
+`is_approved` is true, or `revision_count > MAX_REVISIONS` (default: 2), the graph exits.
 
 ---
 
@@ -75,6 +93,18 @@ compresses it into a manifesto. This:
 The analyst samples up to 15 reviews with stratified sampling: at least 1 low-rated (≤3★) and
 at least 1 high-rated (>3★). This prevents the manifesto from being skewed by a run of
 unusually good or bad experiences.
+
+### Reflection/critic loop
+Early drafts frequently exhibited two failure modes: (1) generic closing sentences that sounded
+like boilerplate AI output regardless of the user's actual writing style, and (2) hallucinated
+specifics (dish names, features) that were not grounded in the reasoning trace. Adding a critic
+node that evaluates the draft before committing addresses both without requiring prompt
+engineering on the drafter alone.
+
+The loop is bounded by `MAX_REVISIONS` (default 2, configurable via env var) to cap latency. At
+the limit, the best draft produced so far is returned regardless of critic verdict. The trade-off
+is up to `MAX_REVISIONS` additional LLM calls per request; the quality benefit has not yet been
+quantified against the baseline (see Known Weaknesses).
 
 ---
 
@@ -144,6 +174,9 @@ and the reasoner defaults to middling predictions when uncertain.
   favour of the two-stage reasoner → drafter split.
 - **Passing raw reviews directly to reasoner**: Context window issues for prolific users;
   manifesto compression solved this cleanly.
+- **Critic loop quality gain (unquantified)**: The critic loop was added to address generic
+  drafts and hallucinated details, but no controlled A/B eval (with vs without critic) has been
+  run yet. Effect on RMSE/MAE/ROUGE-L is unknown.
 
 ---
 
@@ -160,3 +193,6 @@ and the reasoner defaults to middling predictions when uncertain.
 - **Nigerian context**: The Yelp dataset is US-centric. Adapting to Nigerian businesses and
   review conventions (e.g. Lagos restaurant culture, local payment norms) would require a
   Nigeria-specific dataset or few-shot examples grounding the agent in local context.
+- **Critic loop latency**: Each revision cycle adds one critic call + one drafter call. With
+  `MAX_REVISIONS=2` this means up to 4 extra LLM calls in the worst case. Latency impact has not
+  been measured; may matter if the endpoint is used in a real-time context.

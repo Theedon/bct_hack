@@ -136,6 +136,13 @@ def drafter(state: AgentState) -> dict:
         f"Business: {state['biz_name']}\n"
         f"Rating to justify: {state['predicted_rating']}/5"
     )
+
+    if state.get("critic_feedback"):
+        content += (
+            f"\n\n## Previous Draft\n{state.get('draft_review')}\n\n"
+            f"## Critic Feedback\n{state['critic_feedback']}\n\n"
+            "Rewrite the previous draft to fix these specific issues without breaking character."
+        )
     output: DrafterOutput = _llm.invoke(  # type: ignore[assignment]
         [SystemMessage(content=system_prompt), HumanMessage(content=content)]
     )
