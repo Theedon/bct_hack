@@ -1,4 +1,4 @@
-"""One-time script to embed unique businesses from train.csv into a Chroma index."""
+"""One-time script to embed unique businesses from train.csv and test.csv into a Chroma index."""
 
 import sys
 import time
@@ -16,7 +16,8 @@ from src.core.embeddings import GeminiEmbeddings
 from src.core.settings import settings
 from src.core.vectorstore import BUSINESS_COLLECTION
 
-CSV_PATH = "data/yelp_review/train.csv"
+TRAIN_CSV = "data/yelp_review/train.csv"
+TEST_CSV = "data/yelp_review/test.csv"
 BATCH_SIZE = 100
 MAX_SNIPPETS = 3
 SNIPPET_CHARS = 80
@@ -84,9 +85,11 @@ def build_documents(df: pd.DataFrame) -> list[Document]:
 
 
 def main() -> None:
-    print(f"Loading {CSV_PATH}...")
-    df = pd.read_csv(CSV_PATH)
-    print(f"  {len(df)} review rows loaded.")
+    print(f"Loading {TRAIN_CSV} + {TEST_CSV}...")
+    df = pd.concat([pd.read_csv(TRAIN_CSV), pd.read_csv(TEST_CSV)], ignore_index=True)
+    print(
+        f"  {len(df)} review rows loaded ({df['business_id'].nunique()} unique businesses)."
+    )
 
     docs = build_documents(df)
     total = len(docs)
