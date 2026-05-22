@@ -87,7 +87,14 @@ def analyst(state: AgentState) -> dict:
     else:
         content = metrics
 
+    system_prompt = _SYSTEM_PROMPT
+    if state.get("nigerian_mode"):
+        system_prompt += (
+            "\n\nFrame the persona in a Nigerian context. Use Nigerian archetypes "
+            "(e.g., 'Lagos Foodie', 'Abuja Big Boy', 'Mainland Hustler') if appropriate."
+        )
+
     response = _llm.invoke(
-        [SystemMessage(content=_SYSTEM_PROMPT), HumanMessage(content=content)]
+        [SystemMessage(content=system_prompt), HumanMessage(content=content)]
     )
     return {"user_manifesto": clean_content(response.content)}

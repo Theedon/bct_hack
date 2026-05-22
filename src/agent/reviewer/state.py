@@ -13,6 +13,7 @@ class AgentState(TypedDict):
     user_elite_count: int
     user_fans: int
     average_stars: float
+    nigerian_mode: bool
 
     # Analyst node output
     user_manifesto: str

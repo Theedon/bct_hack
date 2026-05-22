@@ -12,6 +12,7 @@ class RecommenderState(TypedDict):
     query: str
     k: int
     messages: list[dict[str, str]]  # conversation history, newest last
+    nigerian_mode: bool
 
     # Profiler outputs
     user_manifesto: str

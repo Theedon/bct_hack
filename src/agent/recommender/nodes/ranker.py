@@ -81,8 +81,16 @@ def ranker(state: RecommenderState) -> dict:
         f"{_format_candidates(candidates)}"
     )
 
+    system_prompt = _SYSTEM_PROMPT
+    if state.get("nigerian_mode"):
+        system_prompt += (
+            "\n\n- Nigerian Context: Write the rationale using Nigerian English "
+            "style rules and colloquialisms (e.g., 'abeg', 'correct place', "
+            "'sharp-sharp', 'jara', Pidgin constructs)."
+        )
+
     output: RankerOutput = _llm.invoke(  # type: ignore[assignment]
-        [SystemMessage(content=_SYSTEM_PROMPT), HumanMessage(content=content)]
+        [SystemMessage(content=system_prompt), HumanMessage(content=content)]
     )
 
     recommendations: list[dict] = []

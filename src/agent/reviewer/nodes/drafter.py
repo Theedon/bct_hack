@@ -74,7 +74,11 @@ def _avg_word_count(reviews: list[dict]) -> int:
 
 
 def _build_system_prompt(
-    avg_words: int, anchors: list[str], predicted_rating: float, categories: str
+    avg_words: int,
+    anchors: list[str],
+    predicted_rating: float,
+    categories: str,
+    nigerian_mode: bool = False,
 ) -> str:
     anchor_rule = (
         (
@@ -86,7 +90,7 @@ def _build_system_prompt(
         else ("2. No anchor phrases available — rely entirely on the manifesto tone.")
     )
 
-    return (
+    prompt = (
         "You are an Elite Ghostwriter for a Stateful Persona Agent. Your goal is to write "
         "a simulated review for a target business that is indistinguishable from the user's "
         "historical voice.\n\n"
@@ -107,6 +111,15 @@ def _build_system_prompt(
         "venue types, or activities inferred from the user's past reviews."
     )
 
+    if nigerian_mode:
+        prompt += (
+            "\n8. Nigerian Context: Use Nigerian English style rules and colloquialisms "
+            "(e.g., 'abeg', 'correct place', 'sharp-sharp', 'jara', Pidgin constructs) "
+            "where natural, while maintaining the user's base persona."
+        )
+
+    return prompt
+
 
 def _format_samples(state: AgentState) -> str:
     if state["new_experience"] or not state["retrieved_reviews"]:
@@ -124,7 +137,11 @@ def drafter(state: AgentState) -> dict:
     avg_words = _avg_word_count(reviews)
 
     system_prompt = _build_system_prompt(
-        avg_words, anchors, state["predicted_rating"], state["categories"]
+        avg_words,
+        anchors,
+        state["predicted_rating"],
+        state["categories"],
+        state.get("nigerian_mode", False),
     )
     samples = _format_samples(state)
 

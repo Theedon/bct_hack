@@ -19,8 +19,10 @@ class _StubLLM:
 
     def __init__(self):
         self.last_human_content = None
+        self.last_system_content = None
 
     def invoke(self, msgs):
+        self.last_system_content = msgs[0].content
         self.last_human_content = msgs[1].content
         return type("R", (), {"content": "stub manifesto"})()
 
@@ -75,3 +77,14 @@ def test_format_history_formats_roles():
         ]
     )
     assert result == "User: hello\nAssistant: world"
+
+
+def test_profiler_injects_nigerian_mode(monkeypatch):
+    stub = _StubLLM()
+    monkeypatch.setattr(profiler_mod, "_llm", stub)
+    monkeypatch.setattr(profiler_mod, "_fetch_user_reviews", lambda uid: ([], []))
+
+    state = {**_BASE_STATE, "nigerian_mode": True}
+    profiler_mod.profiler(state)
+
+    assert "Frame the manifesto in a Nigerian context" in stub.last_system_content

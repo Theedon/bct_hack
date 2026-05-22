@@ -48,3 +48,17 @@ def test_avg_word_count_rounds_to_integer():
     reviews = [{"text": "one two three"}, {"text": "one two three four"}]
     # mean of 3 and 4 is 3.5, round() → 4 (banker's rounding in Python).
     assert _avg_word_count(reviews) == 4
+
+
+def test_build_system_prompt_includes_nigerian_mode():
+    from src.agent.reviewer.nodes.drafter import _build_system_prompt
+
+    prompt = _build_system_prompt(80, [], 4.0, "Restaurants", nigerian_mode=True)
+    assert "Nigerian Context: Use Nigerian English style rules" in prompt
+
+
+def test_build_system_prompt_excludes_nigerian_mode_by_default():
+    from src.agent.reviewer.nodes.drafter import _build_system_prompt
+
+    prompt = _build_system_prompt(80, [], 4.0, "Restaurants")
+    assert "Nigerian Context: Use Nigerian English style rules" not in prompt

@@ -31,8 +31,10 @@ class _StubLLM:
 
     def __init__(self, output: RankerOutput):
         self._output = output
+        self.last_msgs = None
 
     def invoke(self, _messages):
+        self.last_msgs = _messages
         return self._output
 
 
@@ -103,3 +105,16 @@ def test_ranker_returns_empty_when_no_candidates():
     result = ranker(_state_with_candidates(candidates=[]))
     assert result["recommendations"] == []
     assert "No candidates" in result["reasoning_log"]
+
+
+def test_ranker_injects_nigerian_mode(monkeypatch, sample_candidates):
+    fake_output = RankerOutput(reasoning="ok", ranked=[])
+    stub = _StubLLM(fake_output)
+    monkeypatch.setattr(ranker_mod, "_llm", stub)
+
+    state = _state_with_candidates(sample_candidates)
+    state["nigerian_mode"] = True
+    ranker(state)
+
+    system_prompt = stub.last_msgs[0].content
+    assert "Nigerian Context" in system_prompt
