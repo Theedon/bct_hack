@@ -140,14 +140,28 @@ CLI: `uv run python -m src.main_recommend --n <N> --k 10 --output results/output
 
 ## Results
 
-### Final run (new dataset, k=10)
+### Final run (new dataset, k=10, n=304 users)
 | Metric | Overall | Warm-start | Cold-start |
 |---|---|---|---|
-| Hit@10 | [TBD] | [TBD] | [TBD] |
-| Liked Hit@10 | [TBD] | [TBD] | [TBD] |
-| NDCG@10 | [TBD] | [TBD] | [TBD] |
+| Hit@10 | 0.3% (304 users) | 0.3% (304 users) | n/a |
+| Liked Hit@10 | 0.3% (304 users) | 0.3% (304 users) | n/a |
+| NDCG@10 | 0.0044 (225 users) | 0.0044 (225 users) | n/a |
 
-*Rebuild index with `uv run python -m scripts.ingest_businesses` before running.*
+*Index built from train.csv + test.csv (4,350 businesses). CLI: `uv run python -m src.main_recommend --n 429 --k 10`.*
+
+**Key observations:**
+
+- **No cold-start users in eval set** — the per-user holdout split requires ≥7 reviews per user,
+  so every test user has indexed training history. Cold-start path untested by this evaluation.
+
+- **79/304 users excluded from NDCG** — their held-out review was < 4★, so they have no
+  "liked" ground truth. NDCG is only meaningful for the 225 users who liked their held-out
+  business.
+
+- **Low hit rate is structurally expected** — the task asks a content-based system to pick the
+  one specific business (out of 4,350) a user happened to visit next. A random baseline would
+  score ~0.23% hit rate (10/4350); our system at 0.3% is marginally above chance, suggesting
+  the semantic similarity is providing a small real signal.
 
 ---
 
@@ -159,6 +173,9 @@ CLI: `uv run python -m src.main_recommend --n <N> --k 10 --output results/output
   universal cold-start and meaningless NDCG. Replaced with per-user holdout split.
 - **First-N-rows slice**: Introduced date/cluster bias. Replaced with random sampling.
 - **IDCG from retrieved gains**: Inflated NDCG scores. Fixed to use ground-truth relevant count.
+- **Business vectorstore built from train.csv only**: 83.3% of test businesses (353/424) were
+  not in the index, making it structurally impossible to hit them. Fixed by including test.csv
+  businesses in `ingest_businesses.py` (pool: 3,997 → 4,350).
 
 ---
 
@@ -171,6 +188,8 @@ CLI: `uv run python -m src.main_recommend --n <N> --k 10 --output results/output
   NDCG, especially in cold-start.
 - **Cold-start**: Currently falls back to a demographic-only manifesto. Could be improved with
   popularity-based fallback candidates or asking the user for explicit preferences.
+- **Cold-start untested in evaluation**: The per-user holdout split (≥7 reviews required) means
+  all test users are warm-start. Cold-start performance is completely unvalidated.
 - **Nigerian context**: Although the `nigerian_mode` provides a localized tone and rationale,
   the actual Yelp dataset is US-centric. A Nigerian business dataset (e.g. local restaurant
   directories) is still needed for real-world deployment in Nigeria.
