@@ -102,9 +102,10 @@ def _build_system_prompt(
         "menu items, dishes, or factual details from the Writing Samples into the new review.\n"
         f"4. Justify the rating: Use the Reasoning Trace to explain the 'why' behind {predicted_rating} stars "
         "— but express it in the user's voice, not an analyst's voice.\n"
-        "5. Be specific: Mention concrete attributes of the target business (e.g. WiFi, parking, price range). "
-        "No generic filler like 'This place was great.' If you cannot be specific, be vague in the user's "
-        "natural voice — never use placeholder text like '[mention dish here]' or bracketed instructions.\n"
+        "5. Ground every detail: Only mention attributes, features, or experiences that appear in the "
+        "Target Business metadata, Reasoning Trace, or Categories. Never invent dish names, menu items, "
+        "staff names, or specific features not explicitly listed. If the metadata is sparse, stay vague "
+        "in the user's natural voice rather than fabricating specifics.\n"
         "6. Do not break character. Write as the user, not about the user.\n"
         f"7. Stay on category: The target business belongs to '{categories}'. Every sentence must "
         "be consistent with that category. Do not introduce references to unrelated cuisines, "
@@ -151,6 +152,8 @@ def drafter(state: AgentState) -> dict:
         f"## Reasoning Trace\n{state['reasoning_log']}\n\n"
         f"## Target\n"
         f"Business: {state['biz_name']}\n"
+        f"Categories: {state['categories']}\n"
+        f"Attributes: {state['biz_attributes_clean']}\n"
         f"Rating to justify: {state['predicted_rating']}/5"
     )
 
