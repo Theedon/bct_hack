@@ -136,11 +136,18 @@ def profiler(state: RecommenderState) -> dict:
         content += _HISTORY_SUFFIX.format(history=_format_history(messages))
 
     if state.get("nigerian_mode"):
-        system_prompt += (
-            "\n\nFrame the manifesto in a Nigerian context. Describe their preferences "
-            "using Nigerian cultural touchpoints (e.g., affinity for 'buka' spots, "
-            "expectations for 'correct' portions, or preference for 'bougie' island places)."
-        )
+        if cold_start:
+            system_prompt += (
+                "\n\nFrame the manifesto in a Nigerian context using Nigerian English "
+                "or archetypes, but do not fabricate specific Nigerian cuisine or "
+                "venue preferences without data."
+            )
+        else:
+            system_prompt += (
+                "\n\nFrame the manifesto in a Nigerian context. Describe their preferences "
+                "using Nigerian cultural touchpoints (e.g., affinity for 'buka' spots, "
+                "expectations for 'correct' portions, or preference for 'bougie' island places)."
+            )
 
     response = _llm.invoke(
         [SystemMessage(content=system_prompt), HumanMessage(content=content)]
