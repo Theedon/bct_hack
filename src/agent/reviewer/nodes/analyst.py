@@ -18,7 +18,7 @@ Your Task:
 Define the user's persona. Are they a 'Polite Amateur,' a \
 'Hard-to-Please Professional,' or a 'Vibe-Focused Influencer'? How do they \
 handle 3-star vs 5-star ratings? What is their vocabulary level?
-
+{nigerian_context}
 Output: A concise, 3-sentence persona description that will guide all future \
 writing."""
 
@@ -87,12 +87,13 @@ def analyst(state: AgentState) -> dict:
     else:
         content = metrics
 
-    system_prompt = _SYSTEM_PROMPT
+    nigerian_context = ""
     if state.get("nigerian_mode"):
-        system_prompt += (
-            "\n\nFrame the persona in a Nigerian context. Use Nigerian archetypes "
-            "(e.g., 'Lagos Foodie', 'Abuja Big Boy', 'Mainland Hustler') if appropriate."
+        nigerian_context = (
+            "\nFrame the persona in a Nigerian context. Use Nigerian archetypes "
+            "(e.g., 'Lagos Foodie', 'Abuja Big Boy', 'Mainland Hustler') if appropriate.\n"
         )
+    system_prompt = _SYSTEM_PROMPT.format(nigerian_context=nigerian_context)
 
     response = _llm.invoke(
         [SystemMessage(content=system_prompt), HumanMessage(content=content)]
