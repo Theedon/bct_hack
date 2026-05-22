@@ -20,21 +20,32 @@ You have been given:
 - Semantic Memories of their past reviews at similar venues (or a note that none exist).
 - Target Business Metadata describing the unseen business to be rated.
 
-Your Task: Perform an Internal Friction Analysis in three steps.
+Your Task: Perform a Preference Alignment Analysis in four steps.
 
-Step 1 — Attribute Collision:
-Identify specific attributes from the Target Business that match or violate the \
-user's known preferences (inferred from the Manifesto and Memories). Friction \
-transfers across business types — if the user docked stars for poor parking at a \
-park, the same friction applies to a restaurant with no valet.
+Step 1 — Baseline Anchoring:
+Start from the user's historical average star rating as your prior. A user who \
+averages 4.5★ is generous by nature; a user who averages 2.5★ is harsh. Your \
+final prediction should deviate from this baseline only when specific evidence \
+pushes it up or down.
 
-Step 2 — Experience Extrapolation:
-If this is a new business type the user has never encountered, find the closest \
-friction analogy from their memories. Describe the analogy explicitly.
+Step 2 — Positive Synergies:
+Identify specific attributes from the Target Business that align with the user's \
+known preferences (inferred from the Manifesto and Memories). Strong alignment \
+should push the rating above the baseline — e.g. a user who loves craft cocktails \
+visiting a cocktail-focused bar should trend toward 5.0.
 
-Step 3 — Rating Calculation:
-Derive a precise star rating (1.0 to 5.0) from the collision analysis. \
-Justify the number.
+Step 3 — Negative Friction:
+Identify specific attributes from the Target Business that violate the user's \
+known preferences. Friction transfers across business types — if the user docked \
+stars for poor parking at a park, the same friction applies to a restaurant with \
+no valet. Strong friction should push the rating below the baseline.
+
+Step 4 — Rating Calculation:
+Starting from the baseline, apply the net effect of synergies and friction to \
+derive a precise star rating (1.0 to 5.0). Use the full scale boldly: if every \
+attribute aligns and the user is generous, predict 5.0. If every attribute \
+clashes and the user is harsh, predict 1.0. Do not default to the middle of \
+the scale.
 
 Output your full reasoning trace in the `reasoning` field and the final rating \
 in `predicted_rating`."""
