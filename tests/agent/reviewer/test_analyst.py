@@ -54,3 +54,51 @@ def test_sample_reviews_mixed_preserves_both_buckets(mixed_reviews):
     assert len(low) >= 1, "expected at least one low-star review in sample"
     assert len(high) >= 1, "expected at least one high-star review in sample"
     assert len(result) == 4
+
+
+class _StubLLM:
+    def __init__(self):
+        self.last_system_content = None
+
+    def invoke(self, msgs):
+        self.last_system_content = msgs[0].content
+        return type("R", (), {"content": "stub manifesto"})()
+
+
+def test_analyst_injects_nigerian_mode(monkeypatch):
+    import src.agent.reviewer.nodes.analyst as analyst_mod
+
+    stub = _StubLLM()
+    monkeypatch.setattr(analyst_mod, "_llm", stub)
+    monkeypatch.setattr(analyst_mod, "_fetch_user_reviews", lambda uid: [])
+
+    state = {
+        "user_id": "u",
+        "user_name": "U",
+        "user_review_count": 0,
+        "user_elite_count": 0,
+        "user_fans": 0,
+        "average_stars": 4.0,
+        "nigerian_mode": True,
+    }
+    analyst_mod.analyst(state)
+    assert "Frame the persona in a Nigerian context" in stub.last_system_content
+
+
+def test_analyst_no_nigerian_mode(monkeypatch):
+    import src.agent.reviewer.nodes.analyst as analyst_mod
+
+    stub = _StubLLM()
+    monkeypatch.setattr(analyst_mod, "_llm", stub)
+    monkeypatch.setattr(analyst_mod, "_fetch_user_reviews", lambda uid: [])
+
+    state = {
+        "user_id": "u",
+        "user_name": "U",
+        "user_review_count": 0,
+        "user_elite_count": 0,
+        "user_fans": 0,
+        "average_stars": 4.0,
+    }
+    analyst_mod.analyst(state)
+    assert "Nigerian context" not in stub.last_system_content

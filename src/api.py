@@ -19,6 +19,7 @@ class ReviewRequest(BaseModel):
     biz_name: str
     categories: str
     biz_attributes_clean: str
+    nigerian_mode: bool = False
 
 
 class ReviewResponse(BaseModel):
@@ -44,6 +45,7 @@ class RecommendRequest(BaseModel):
     query: str | None = None
     k: int = 10
     messages: list[Message] = []
+    nigerian_mode: bool = False
 
 
 class Recommendation(BaseModel):
@@ -83,6 +85,7 @@ async def generate_review(request: ReviewRequest):
             "biz_name": request.biz_name,
             "categories": request.categories,
             "biz_attributes_clean": request.biz_attributes_clean,
+            "nigerian_mode": request.nigerian_mode,
         }  # type: ignore
     )
     return ReviewResponse(
@@ -107,6 +110,7 @@ async def recommend(request: RecommendRequest):
             "query": request.query or "",
             "k": request.k,
             "messages": [m.model_dump() for m in request.messages],
+            "nigerian_mode": request.nigerian_mode,
         }  # type: ignore
     )
     return RecommendResponse(

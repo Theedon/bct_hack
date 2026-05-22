@@ -98,6 +98,9 @@ location-aware queries (e.g. "quiet coffee shop in Philadelphia") match correctl
 similarity. They are also stored in metadata and propagated through candidate → ranker →
 API response so clients can display location alongside recommendations.
 
+### Nigerian Contextualization (Bonus)
+An optional `nigerian_mode` flag allows the recommendation pipeline to adopt a localized voice. When enabled, the profiler frames the preference manifesto using Nigerian cultural touchpoints (e.g., 'buka' spots), and the ranker uses Nigerian English in its recommendation rationales.
+
 ---
 
 ## Data Pipeline
@@ -168,7 +171,8 @@ CLI: `uv run python -m src.main_recommend --n <N> --k 10 --output results/output
   NDCG, especially in cold-start.
 - **Cold-start**: Currently falls back to a demographic-only manifesto. Could be improved with
   popularity-based fallback candidates or asking the user for explicit preferences.
-- **Nigerian context**: Yelp is US-centric. A Nigerian business dataset (e.g. local restaurant
-  directories) would be needed for real-world deployment in Nigeria.
+- **Nigerian context**: Although the `nigerian_mode` provides a localized tone and rationale,
+  the actual Yelp dataset is US-centric. A Nigerian business dataset (e.g. local restaurant
+  directories) is still needed for real-world deployment in Nigeria.
 - **Model**: Gemini 2.5 Flash Lite. A stronger model for the ranker specifically would improve
   the quality of rationales and fit scores.

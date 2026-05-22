@@ -19,7 +19,7 @@ what they value in a business. Cover: cuisine / business types they gravitate \
 toward, ambiance preferences (quiet vs lively, casual vs upscale), price \
 sensitivity, service expectations, and any deal-breakers you can infer from \
 their lower-rated reviews.
-
+{nigerian_context}
 Output: A 4–6 sentence preference manifesto written in third person ("This \
 user prefers..."). Be specific and grounded in the samples — do not invent \
 preferences the data does not support."""
@@ -32,7 +32,7 @@ Infer cautiously. Mention what the stats suggest (e.g. a high review count \
 with Elite status implies an active, discerning reviewer; zero reviews \
 implies a true newcomer) but do not fabricate specific cuisine or ambiance \
 preferences.
-
+{nigerian_context}
 Output: A 3–4 sentence preference manifesto in third person that \
 acknowledges the limited signal and stays general."""
 
@@ -124,16 +124,33 @@ def profiler(state: RecommenderState) -> dict:
             for r in reviews
         )
         content = f"{metrics}\n\nReview Samples ({len(reviews)} reviews):\n{samples}"
-        system_prompt = _SYSTEM_PROMPT_WARM
+        base_system_prompt = _SYSTEM_PROMPT_WARM
         cold_start = False
     else:
         content = metrics
-        system_prompt = _SYSTEM_PROMPT_COLD
+        base_system_prompt = _SYSTEM_PROMPT_COLD
         cold_start = True
 
     messages = state.get("messages") or []
     if messages:
         content += _HISTORY_SUFFIX.format(history=_format_history(messages))
+
+    nigerian_context = ""
+    if state.get("nigerian_mode"):
+        if cold_start:
+            nigerian_context = (
+                "\nFrame the manifesto in a Nigerian context using Nigerian English "
+                "or archetypes, but do not fabricate specific Nigerian cuisine or "
+                "venue preferences without data.\n"
+            )
+        else:
+            nigerian_context = (
+                "\nFrame the manifesto in a Nigerian context. Describe their preferences "
+                "using Nigerian cultural touchpoints (e.g., affinity for 'buka' spots, "
+                "expectations for 'correct' portions, or preference for 'bougie' island places).\n"
+            )
+
+    system_prompt = base_system_prompt.format(nigerian_context=nigerian_context)
 
     response = _llm.invoke(
         [SystemMessage(content=system_prompt), HumanMessage(content=content)]
