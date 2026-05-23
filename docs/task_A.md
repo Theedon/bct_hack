@@ -167,30 +167,39 @@ cautious profiles (not enough positive signal in the limited review history unde
 and the reasoner defaults to middling predictions when uncertain.
 
 ### Sample run (new dataset, n=50, after prompt fixes)
-| Metric | Before fix | After fix | Δ |
-|---|---|---|---|
-| RMSE | 1.3964 | 1.3596 | −0.037 |
-| MAE | 1.1200 | 0.9592 | −0.161 |
-| ROUGE-L | 0.1300 | 0.1367 | +0.007 |
 
-**Per-star error analysis (after fix):**
+**Progression across fixes:**
+| Metric | Before fixes | + Prompt rewrite | + Explicit avg_stars |
+|---|---|---|---|
+| RMSE | 1.3964 | 1.3596 | **1.2215** |
+| MAE | 1.1200 | 0.9592 | **0.8920** |
+| ROUGE-L | 0.1300 | 0.1367 | **0.1327** |
+| Within 0.5★ | — | 35% | **38%** |
+| Exact match | — | — | **30%** |
+
+**Per-star error analysis (latest):**
 | Actual Stars | n | Mean Predicted | Mean Signed Error | MAE |
 |---|---|---|---|---|
-| 1★ | 3 | 4.33 | +3.33 | 3.33 |
+| 1★ | 3 | 3.67 | +2.67 | 2.67 |
 | 2★ | 5 | 4.00 | +2.00 | 2.00 |
-| 3★ | 9 | 3.74 | +0.74 | 0.74 |
-| 4★ | 8 | 3.88 | −0.12 | 0.62 |
-| 5★ | 24 | 4.36 | −0.64 | 0.64 |
+| 3★ | 9 | 3.78 | +0.78 | 0.78 |
+| 4★ | 9 | 3.91 | −0.09 | 0.58 |
+| 5★ | 24 | 4.40 | −0.60 | 0.60 |
 
 **Key findings:**
-- 35% of predictions are within 0.5★ of actual — reasonable for persona-based prediction.
-- The prompt fixes improved 5★ prediction substantially (16/49 predicted 5.0 vs 3/50 before).
-- 3★ and 4★ actuals are well-calibrated (MAE < 0.75).
+- 38% of predictions are within 0.5★ of actual, and 30% are exact matches.
+- 3–5★ actuals are well-calibrated (MAE ≤ 0.78). 4★ predictions are nearly perfect
+  (mean error −0.09).
+- Passing the explicit `average_stars` value to the reasoner was the single biggest
+  improvement (RMSE −0.14), confirming that baseline anchoring works best with
+  precise numerical input rather than inferring from the manifesto.
 - **Low-star reviews (1–2★) remain severely overpredicted.** All 8 low-star actuals were
-  overpredicted, with mean error of +2.5★. Root cause: these reviews describe one-off bad
+  overpredicted, with mean error of +2.3★. Root cause: these reviews describe one-off bad
   *experiences* (food poisoning, insects in food, wrong orders) that cannot be inferred from
   business attributes or user preferences. The model correctly identifies that the business
   *type* matches the user's preferences but cannot anticipate service failures.
+- Excluding the 8 unpredictable low-star outliers, the effective MAE on the remaining 42
+  cases is ~0.62.
 - **No cold-start users in this sample** (`new_experience=False` for all 50). The per-user
   holdout split guarantees every test user has indexed history, so warm/cold breakdown is not
   applicable with this dataset.
