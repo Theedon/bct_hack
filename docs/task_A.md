@@ -204,12 +204,6 @@ and the reasoner defaults to middling predictions when uncertain.
   holdout split guarantees every test user has indexed history, so warm/cold breakdown is not
   applicable with this dataset.
 
-### Final run (new dataset)
-| Metric | Score |
-|---|---|
-| RMSE | [TBD] |
-| MAE | [TBD] |
-| ROUGE-L | [TBD] |
 
 ---
 
