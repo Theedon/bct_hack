@@ -196,6 +196,33 @@ optimises for. The demo scenarios in `demos/recommend_demo.py` provide concrete 
 this: the system produces coherent, manifesto-grounded recommendations across cold-start,
 explicit query, multi-turn refinement, and Nigerian contextualisation scenarios.
 
+### Cold-start demo (captured run)
+
+User **Amara** — `user_id: "demo-cold-start-001"`, zero reviews, no Elite status, no fans.
+The system correctly sets `cold_start: true` and builds a demographic-only manifesto without
+fabricating preferences.
+
+**Manifesto (generated):**
+> Amara appears to be a new user on the platform, with no recorded reviews or influence among
+> other users. Her non-Elite status and zero average star rating suggest she is either just
+> beginning her Yelp journey or has not yet engaged with the review system. As such, her
+> preferences are currently undefined, offering no discernible pattern for analysis at this time.
+
+**Top-5 recommendations (k=5):**
+
+| # | Business | Location | Categories | Score |
+|---|---|---|---|---|
+| 1 | Bardea Food & Drink | Wilmington, DE | Bars, Italian, Restaurants | 0.90 |
+| 2 | BellaBrava | St. Petersburg, FL | Pizza, Bars, Italian, Restaurants | 0.85 |
+| 3 | Mike's Ice Cream | Nashville, TN | Ice Cream, Coffee & Tea, Sandwiches | 0.80 |
+| 4 | Aroma Mediterranean Cuisine | King of Prussia, PA | Mediterranean, Middle Eastern | 0.75 |
+| 5 | Nam Phuong | Philadelphia, PA | Seafood, Vietnamese | 0.70 |
+
+The system falls back to **popularity- and quality-signal-based ranking** (high Yelp stars,
+broadly appealing categories) when no preference history exists — exactly the correct behaviour
+for a true cold-start user. Rationales reference objective business attributes (star rating,
+amenities, suitability for groups) rather than fabricated user preferences.
+
 ---
 
 ## Ablations & Things That Did Not Work
