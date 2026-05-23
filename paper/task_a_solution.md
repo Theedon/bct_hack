@@ -63,7 +63,7 @@ analyst → retriever → reasoner → drafter → critic ─┐
 samples up to 15 past reviews from the `yelp_reviews` ChromaDB collection using a metadata
 filter (`where={"user_id": user_id}`) — not a similarity search. Reviews are stratified: at
 least one low-rated (≤3 stars) and one high-rated (>3 stars) to prevent the manifesto from
-being skewed by a run of unusually good or bad experiences. The output is a 4–6 sentence
+being skewed by a run of unusually good or bad experiences. The output is a concise
 third-person Persona Manifesto describing the user's tone, rating bias, cuisine preferences,
 ambiance preferences, and deal-breakers.
 

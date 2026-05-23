@@ -26,7 +26,7 @@ analyst → retriever → reasoner → drafter → critic ─┐
 ### analyst
 Reads user metadata (review count, average stars, elite status, fan count) and samples up to 15
 of their past reviews from the `yelp_reviews` ChromaDB collection. Builds a **Persona Manifesto**
-— a 4–6 sentence third-person profile covering tone, rating bias, cuisine preferences, ambiance
+— a concise third-person profile covering tone, rating bias, cuisine preferences, ambiance
 preferences, and inferred deal-breakers. Uses a warm-start prompt when reviews exist and a
 cold-start prompt (more cautious, general) when the user has no indexed history.
 

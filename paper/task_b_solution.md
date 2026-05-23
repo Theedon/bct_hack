@@ -55,7 +55,7 @@ profiler → candidate → ranker → END
 
 **Profiler.** Fetches all of the user's indexed reviews from `yelp_reviews` using a metadata
 filter (`where={"user_id": user_id}`) and builds a Preference Manifesto — a 4–6 sentence
-summary of what the user values: cuisine types, ambiance preferences, price sensitivity,
+(warm-start) or 3–4 sentence (cold-start) summary of what the user values: cuisine types, ambiance preferences, price sensitivity,
 service expectations, and deal-breakers inferred from low-rated reviews. Reviews are
 stratified-sampled (up to 15, at least one low-rated and one high-rated) to prevent bias.
 
