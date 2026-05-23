@@ -3,6 +3,7 @@
 import sys
 from pathlib import Path
 
+import chromadb
 import pandas as pd
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
@@ -55,6 +56,13 @@ def build_documents(df: pd.DataFrame) -> list[Document]:
 
 
 def main() -> None:
+    client = chromadb.PersistentClient(path=settings.CHROMA_PATH)
+    try:
+        client.delete_collection(COLLECTION_NAME)
+        print(f"Dropped existing '{COLLECTION_NAME}' collection.")
+    except Exception:
+        pass
+
     print(f"Loading {CSV_PATH}...")
     df = pd.read_csv(CSV_PATH)
     total = len(df)
@@ -67,7 +75,7 @@ def main() -> None:
     batches = [docs[i : i + BATCH_SIZE] for i in range(0, total, BATCH_SIZE)]
     print(f"Embedding {total} documents in {len(batches)} batches of {BATCH_SIZE}...")
 
-    vectorstore = None
+    vectorstore: Chroma | None = None
     with tqdm(total=total, unit="doc", desc="Indexing") as bar:
         for i, batch in enumerate(batches):
             if i == 0:
@@ -78,6 +86,7 @@ def main() -> None:
                     persist_directory=settings.CHROMA_PATH,
                 )
             else:
+                assert vectorstore is not None
                 vectorstore.add_documents(batch)
             bar.update(len(batch))
 

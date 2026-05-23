@@ -1,9 +1,10 @@
-"""One-time script to embed unique businesses from train.csv into a Chroma index."""
+"""One-time script to embed unique businesses from train.csv and test.csv into a Chroma index."""
 
 import sys
 import time
 from pathlib import Path
 
+import chromadb
 import pandas as pd
 import requests
 from langchain_chroma import Chroma
@@ -16,7 +17,8 @@ from src.core.embeddings import GeminiEmbeddings
 from src.core.settings import settings
 from src.core.vectorstore import BUSINESS_COLLECTION
 
-CSV_PATH = "data/yelp_review/train.csv"
+TRAIN_CSV = "data/yelp_review/train.csv"
+TEST_CSV = "data/yelp_review/test.csv"
 BATCH_SIZE = 100
 MAX_SNIPPETS = 3
 SNIPPET_CHARS = 80
@@ -84,9 +86,29 @@ def build_documents(df: pd.DataFrame) -> list[Document]:
 
 
 def main() -> None:
-    print(f"Loading {CSV_PATH}...")
-    df = pd.read_csv(CSV_PATH)
-    print(f"  {len(df)} review rows loaded.")
+    client = chromadb.PersistentClient(path=settings.CHROMA_PATH)
+    try:
+        client.delete_collection(BUSINESS_COLLECTION)
+        print(f"Dropped existing '{BUSINESS_COLLECTION}' collection.")
+    except Exception:
+        pass
+
+    print(f"Loading {TRAIN_CSV} + {TEST_CSV}...")
+    train_df = pd.read_csv(TRAIN_CSV)
+    test_df = pd.read_csv(TEST_CSV)
+    # Include test-only businesses for catalog coverage but strip their review content
+    # so held-out ratings and text don't leak into the vectorstore embeddings.
+    test_only = (
+        test_df[~test_df["business_id"].isin(train_df["business_id"])]
+        .drop_duplicates("business_id")
+        .copy()
+    )
+    test_only[["text", "stars_review"]] = None
+    df = pd.concat([train_df, test_only], ignore_index=True)
+    print(
+        f"  {len(train_df)} train rows + {len(test_only)} test-only businesses "
+        f"({df['business_id'].nunique()} unique businesses total)."
+    )
 
     docs = build_documents(df)
     total = len(docs)
