@@ -1,0 +1,38 @@
+# Version control
+.git
+.gitignore
+
+# Python artifacts
+__pycache__
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Environment files (contain secrets)
+.env
+.env.local
+.env.staging
+.env.example
+
+# Dev tools
+.pre-commit-config.yaml
+scratch/
+
+# Evaluation outputs
+results/
+
+# Tests and docs (not needed at runtime)
+tests/
+docs/
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+
+# IDE / editor
+.vscode/
+.idea/
