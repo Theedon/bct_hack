@@ -67,6 +67,30 @@ curl http://localhost:8000/health
 # {"status": "ok"}
 ```
 
+## Docker
+
+### Quick start (recommended for judges)
+
+Pull and run — no Python, no `uv`, no ingestion required:
+
+```bash
+docker run -e GOOGLE_API_KEY=your-key -p 8000:8000 theedon/bct-hack:latest
+```
+
+### Build from source
+
+```bash
+# Make sure data/chroma_db/ exists (run ingest scripts first if needed)
+GOOGLE_API_KEY=your-key docker compose up --build
+```
+
+### Verify
+
+```bash
+curl http://localhost:8000/health
+# {"status": "ok"}
+```
+
 ## Endpoints
 
 ### `POST /generate-review` — Task A
