@@ -15,8 +15,8 @@ they would leave — matching their tone, vocabulary, and rating behaviour.
 
 Our system is a five-node LangGraph agent pipeline that models each user as a *persona* rather
 than a feature vector. An analyst node reads the user's past reviews and compresses them into
-a Persona Manifesto — a concise behavioural profile. A retriever fetches semantically similar
-reviews from other users as grounding context. A reasoner predicts the star rating through
+a Persona Manifesto — a concise behavioural profile. A retriever finds the user's own past
+reviews of similar businesses as grounding context. A reasoner predicts the star rating through
 structured chain-of-thought. A drafter ghostwrites the review in the user's voice. Finally,
 a critic evaluates the draft against four quality criteria and sends it back for revision if
 needed.
@@ -67,10 +67,10 @@ being skewed by a run of unusually good or bad experiences. The output is a 4–
 third-person Persona Manifesto describing the user's tone, rating bias, cuisine preferences,
 ambiance preferences, and deal-breakers.
 
-**Retriever.** Embeds the target business attributes and runs a similarity search against
-`yelp_reviews` to find reviews of similar businesses by other users. Returns up to 5
-reference reviews to give the reasoner grounding in what real customers say about this type
-of business.
+**Retriever.** Constructs a query from the target business's categories and attributes, then
+runs a similarity search against `yelp_reviews` filtered to the current user. This surfaces
+the user's own past reviews of similar businesses — up to 5 reference reviews that ground the
+reasoner in how this specific user has reacted to comparable experiences.
 
 **Reasoner.** Takes the manifesto, reference reviews, and target business metadata. Produces
 a `predicted_rating` (float, 1.0–5.0) and a `reasoning_log` (chain-of-thought) via Pydantic

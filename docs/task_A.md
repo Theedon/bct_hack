@@ -31,10 +31,10 @@ preferences, and inferred deal-breakers. Uses a warm-start prompt when reviews e
 cold-start prompt (more cautious, general) when the user has no indexed history.
 
 ### retriever
-Embeds the target business attributes (name, categories, attributes) and runs a similarity search
-against `yelp_reviews` to find reviews of similar businesses by other users. Returns up to 5
-reference reviews to give the reasoner grounding in what real customers say about this type of
-business.
+Constructs a query from the target business's categories and attributes, then runs a similarity
+search against `yelp_reviews` filtered to the current user. This surfaces the user's own past
+reviews of similar businesses — up to 5 reference reviews that ground the reasoner in how this
+specific user has reacted to comparable experiences.
 
 ### reasoner
 Takes the persona manifesto, retrieved reference reviews, and target business metadata. Uses
