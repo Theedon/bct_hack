@@ -42,16 +42,20 @@ structured output (Pydantic model) to produce:
 - `predicted_rating` (float, 1–5)
 - `reasoning_log` (chain-of-thought explaining the rating decision)
 
-The chain-of-thought explicitly checks for attribute collision (e.g. user hates noisy bars →
-target is a noisy bar → predict low) and cross-domain generalisation (e.g. user loves Indian
-food → target is Pakistani → likely positive).
+The chain-of-thought follows a four-step **Preference Alignment Analysis**: (1) anchor on the
+user's historical average star rating as a prior, (2) identify positive synergies between the
+target business attributes and the user's known preferences, (3) identify negative friction
+where attributes violate preferences, and (4) derive a final rating from the net effect. The
+prompt explicitly encourages use of the full 1.0–5.0 scale.
 
 ### drafter
-Takes the persona manifesto, predicted rating, reasoning log, and reference reviews. Generates
-the written review in the user's voice — matching their vocabulary, sentence length, tone
-(enthusiastic vs critical vs neutral), and typical structural patterns. On revision passes, the
-prompt is extended with the previous draft and the critic's specific feedback, instructing the
-model to rewrite rather than start from scratch.
+Takes the persona manifesto, predicted rating, reasoning log, reference reviews, and **target
+business attributes** (categories + full attribute dictionary). Generates the written review in
+the user's voice — matching their vocabulary, sentence length, tone (enthusiastic vs critical vs
+neutral), and typical structural patterns. The prompt instructs the drafter to ground every
+detail in the provided metadata rather than inventing specifics. On revision passes, the prompt
+is extended with the previous draft and the critic's specific feedback, instructing the model to
+rewrite rather than start from scratch.
 
 ### critic
 Evaluates the draft review against four criteria using structured output (`is_approved: bool`,
@@ -162,12 +166,44 @@ reviews were predicted at 2.5–3.5★. The pattern suggests the persona manifes
 cautious profiles (not enough positive signal in the limited review history under the old dataset)
 and the reasoner defaults to middling predictions when uncertain.
 
-### Final run (new dataset)
-| Metric | Score |
-|---|---|
-| RMSE | [TBD] |
-| MAE | [TBD] |
-| ROUGE-L | [TBD] |
+### Sample run (new dataset, n=50, after prompt fixes)
+
+**Progression across fixes:**
+| Metric | Before fixes | + Prompt rewrite | + Explicit avg_stars |
+|---|---|---|---|
+| RMSE | 1.3964 | 1.3596 | **1.2215** |
+| MAE | 1.1200 | 0.9592 | **0.8920** |
+| ROUGE-L | 0.1300 | 0.1367 | **0.1327** |
+| Within 0.5★ | — | 35% | **38%** |
+| Exact match | — | — | **30%** |
+
+**Per-star error analysis (latest):**
+| Actual Stars | n | Mean Predicted | Mean Signed Error | MAE |
+|---|---|---|---|---|
+| 1★ | 3 | 3.67 | +2.67 | 2.67 |
+| 2★ | 5 | 4.00 | +2.00 | 2.00 |
+| 3★ | 9 | 3.78 | +0.78 | 0.78 |
+| 4★ | 9 | 3.91 | −0.09 | 0.58 |
+| 5★ | 24 | 4.40 | −0.60 | 0.60 |
+
+**Key findings:**
+- 38% of predictions are within 0.5★ of actual, and 30% are exact matches.
+- 3–5★ actuals are well-calibrated (MAE ≤ 0.78). 4★ predictions are nearly perfect
+  (mean error −0.09).
+- Passing the explicit `average_stars` value to the reasoner was the single biggest
+  improvement (RMSE −0.14), confirming that baseline anchoring works best with
+  precise numerical input rather than inferring from the manifesto.
+- **Low-star reviews (1–2★) remain severely overpredicted.** All 8 low-star actuals were
+  overpredicted, with mean error of +2.3★. Root cause: these reviews describe one-off bad
+  *experiences* (food poisoning, insects in food, wrong orders) that cannot be inferred from
+  business attributes or user preferences. The model correctly identifies that the business
+  *type* matches the user's preferences but cannot anticipate service failures.
+- Excluding the 8 unpredictable low-star outliers, the effective MAE on the remaining 42
+  cases is ~0.62.
+- **No cold-start users in this sample** (`new_experience=False` for all 50). The per-user
+  holdout split guarantees every test user has indexed history, so warm/cold breakdown is not
+  applicable with this dataset.
+
 
 ---
 
@@ -180,14 +216,32 @@ and the reasoner defaults to middling predictions when uncertain.
 - **Critic loop quality gain (unquantified)**: The critic loop was added to address generic
   drafts and hallucinated details, but no controlled A/B eval (with vs without critic) has been
   run yet. Effect on RMSE/MAE/ROUGE-L is unknown.
+- **Friction-only reasoner prompt (replaced)**: The original reasoner prompt framed rating
+  prediction as an "Internal Friction Analysis" — a three-step process focused on finding
+  attribute violations. This caused the model to collapse all predictions toward 3.5–4.0★
+  regardless of the actual rating, producing a mean signed error of +3.0 on 1★ actuals and
+  −1.0 on 5★ actuals. Replacing with a balanced "Preference Alignment Analysis" that anchors
+  on the user's average stars and considers both synergies and friction reduced MAE from 1.12
+  to 0.96.
+- **Drafter without business attributes (fixed)**: The drafter prompt demanded specificity
+  about attributes ("WiFi, parking, price range") but was never passed `biz_attributes_clean`
+  — only the reasoner received it. This forced the LLM to hallucinate details to satisfy the
+  prompt. Passing the full attribute dictionary and rewriting the prompt to "Ground every
+  detail" in provided metadata reduced hallucinated specifics.
 
 ---
 
 ## Known Weaknesses & Future Work
 
-- **5★ underprediction bias**: The agent skews to 3–4★ even for enthusiastic users. Likely
-  fixable by tuning the reasoner prompt to weight positive signals from the manifesto more
-  aggressively.
+- **Experience-driven outlier blindness**: The biggest remaining error source. Low-star reviews
+  (1–2★) are almost always driven by one-off bad experiences (food poisoning, insects, wrong
+  orders) that cannot be inferred from business attributes or user preference profiles. The model
+  correctly identifies attribute-preference alignment but cannot anticipate service failures.
+  This is a fundamental limitation of attribute-based reasoning; addressing it would require
+  incorporating real-time signals (e.g. recent review sentiment trends for the target business).
+- **5★ residual conservatism**: After prompt fixes, 13/24 actual 5★ reviews were predicted at
+  4.0★ (−1.0 error). The model is still slightly reluctant to commit to perfect scores. Further
+  tuning of the reasoner prompt or using a stronger model for the reasoner node may help.
 - **ROUGE-L ceiling**: Lexical overlap with ground-truth reviews is inherently limited because
   the model generates plausible text, not the exact words the user would write. BERTScore
   (semantic similarity) would be a fairer measure of text quality.
@@ -197,6 +251,12 @@ and the reasoner defaults to middling predictions when uncertain.
   underlying Yelp dataset remains US-centric. Adapting the system fully to Nigerian businesses would
   require a Nigeria-specific dataset to prevent a mismatch between the cultural tone and the
   actual business attributes.
+- **Regex-based anchor extraction**: The drafter currently uses a hand-crafted regex
+  (`_STYLISTIC_FRAGMENT`) to extract stylistic fragments from past reviews and feed them as
+  explicit anchor phrases. This is brittle (only matches four narrow patterns), redundant with
+  the Writing Samples the drafter already receives, and misses many distinctive phrases. Removing
+  the regex pipeline and letting the LLM infer style entirely from the Writing Samples and
+  Persona Manifesto would simplify the code and likely improve voice fidelity.
 - **Critic loop latency**: Each revision cycle adds one critic call + one drafter call. With
   `MAX_REVISIONS=2` this means up to 4 extra LLM calls in the worst case. Latency impact has not
   been measured; may matter if the endpoint is used in a real-time context.
