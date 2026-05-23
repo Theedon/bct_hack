@@ -66,6 +66,7 @@ def reasoner(state: AgentState) -> dict:
     memories = _format_memories(state)
     content = (
         f"## Persona Manifesto\n{state['user_manifesto']}\n\n"
+        f"## User Baseline\nHistorical average star rating: {state['average_stars']}\n\n"
         f"## Semantic Memories\n{memories}\n\n"
         f"## Target Business\n"
         f"Name: {state['biz_name']}\n"
