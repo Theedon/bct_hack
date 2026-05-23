@@ -30,21 +30,22 @@ strong { font-weight: bold; }
 
 def convert(md_path: str) -> None:
     src = Path(md_path)
-    text = src.read_text()
+    text = src.read_text(encoding="utf-8")
 
     # Extract YAML front matter for title/subtitle/author
     title = subtitle = author = ""
     if text.startswith("---"):
-        end = text.index("---", 3)
-        front = text[3:end]
-        text = text[end + 3 :].strip()
-        for line in front.strip().split("\n"):
-            if line.startswith("title:"):
-                title = line.split(":", 1)[1].strip().strip('"')
-            elif line.startswith("subtitle:"):
-                subtitle = line.split(":", 1)[1].strip().strip('"')
-            elif line.startswith("author:"):
-                author = line.split(":", 1)[1].strip().strip('"')
+        end = text.find("---", 3)
+        if end != -1:
+            front = text[3:end]
+            text = text[end + 3 :].strip()
+            for line in front.strip().split("\n"):
+                if line.startswith("title:"):
+                    title = line.split(":", 1)[1].strip().strip('"')
+                elif line.startswith("subtitle:"):
+                    subtitle = line.split(":", 1)[1].strip().strip('"')
+                elif line.startswith("author:"):
+                    author = line.split(":", 1)[1].strip().strip('"')
 
     header_html = ""
     if title:
