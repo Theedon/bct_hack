@@ -251,6 +251,12 @@ and the reasoner defaults to middling predictions when uncertain.
   underlying Yelp dataset remains US-centric. Adapting the system fully to Nigerian businesses would
   require a Nigeria-specific dataset to prevent a mismatch between the cultural tone and the
   actual business attributes.
+- **Regex-based anchor extraction**: The drafter currently uses a hand-crafted regex
+  (`_STYLISTIC_FRAGMENT`) to extract stylistic fragments from past reviews and feed them as
+  explicit anchor phrases. This is brittle (only matches four narrow patterns), redundant with
+  the Writing Samples the drafter already receives, and misses many distinctive phrases. Removing
+  the regex pipeline and letting the LLM infer style entirely from the Writing Samples and
+  Persona Manifesto would simplify the code and likely improve voice fidelity.
 - **Critic loop latency**: Each revision cycle adds one critic call + one drafter call. With
   `MAX_REVISIONS=2` this means up to 4 extra LLM calls in the worst case. Latency impact has not
   been measured; may matter if the endpoint is used in a real-time context.
